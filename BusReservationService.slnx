@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="BusReservationService.Database/BusReservationService.Database.csproj" Id="1b9c9352-4be8-415d-9e4a-fd95d922cc9d" />
+  <Project Path="BusReservationService.Domain/BusReservationService.Domain.csproj" Id="9e6f2dba-2aab-4a9d-a38d-f9bb6f429f5a" />
+  <Project Path="BusReservationService.Share/BusReservationService.Share.csproj" Id="40575f99-75cc-4b4a-bd75-00ed9275e0f3" />
+  <Project Path="BusReservationService.Test/BusReservationService.Test.csproj">
+    <BuildDependency Project="BusReservationService/BusReservationService.csproj" />
+  </Project>
+  <Project Path="BusReservationService/BusReservationService.csproj" />
+</Solution>
