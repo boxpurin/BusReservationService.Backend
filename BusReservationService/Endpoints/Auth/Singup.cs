@@ -27,31 +27,29 @@ internal class Singup(IAccountService AccountRegistorationService) : Endpoint<Si
     
     public override async Task<ResponseType> HandleAsync(SingupRequest req, CancellationToken c)
     {
-
-        var result = await AccountRegistorationService.RegistorationAccount(
+        var account = await AccountRegistorationService.RegistorationAccount(
             new RegistrationAccount(req.Email, req.Password, AccountRole.User)
             );
 
-        if (result.IsOk)
+        if (account is null)
         {
-            var account = result.Value!;
-            var sessionId = Guid.CreateVersion7().ToString();
-
-            await CookieAuth.SignInAsync(u =>
-            {
-                u.Roles.Add("User");
-                u.Permissions.Add("RegistedUser");
-
-                u.Claims.Add(new("SessionId", sessionId));
-            });
-
-            return TypedResults.Created(
-                $"/auth/signup/{account.Id}",
-                new SingupResponse(new AccountModel(account))
-            );
+            return TypedResults.BadRequest();
         }
 
-        return TypedResults.BadRequest(result.exception);
+        var sessionId = Guid.CreateVersion7().ToString();
+
+        await CookieAuth.SignInAsync(u =>
+        {
+            u.Roles.Add("User");
+            u.Permissions.Add("RegistedUser");
+
+            u.Claims.Add(new("SessionId", sessionId));
+        });
+
+        return TypedResults.Created(
+            $"/auth/signup/{account.Id}",
+            new SingupResponse(new AccountModel(account))
+        );
     }
 }
 

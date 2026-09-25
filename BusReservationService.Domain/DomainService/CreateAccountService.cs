@@ -26,11 +26,5 @@ public class CreateAccountService
             AccountRole.User,
             AccountStatus.JustCreated
         );
-
-        var result = await AccountRepository.AddAsync(account);
-
-        if (result.IsOk)
-        {
-        }
     }
 }
