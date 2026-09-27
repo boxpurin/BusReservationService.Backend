@@ -4,8 +4,8 @@ public enum AccountRole
 {
     Guest = 0,
     User = 1,
-    LotAdmin = 2,
-    Admin = 3,
+    Admin = 2,
+    LotAdmin = 3,
 }
 
 /// <summary>
