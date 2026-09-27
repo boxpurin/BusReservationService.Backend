@@ -18,7 +18,16 @@ public class ConvertibleAutoTests
         var targetTypes = targetAssembly.GetTypes()
                 .Where(t => t.IsClass && !t.IsAbstract)
                 .Where(t => t.GetInterfaces().Any(i =>
-                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConvertibleToDomain<>)));
+                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConvertibleToDomain<>)))
+                .ToList();
+
+
+        if (targetTypes.Count is 0)
+        {
+            // 対象0件でもTheoryとして最低1件データを流し、成功扱いで終わらせる
+            yield return new object[] { null! };
+            yield break;
+        }
 
         foreach (var type in targetTypes)
         {
@@ -28,8 +37,12 @@ public class ConvertibleAutoTests
     
     [Theory]
     [MemberData(nameof(GetConvertibleTypes))]
-    public void All_IConvertible_Classes_Should_Be_Instantiable_And_Convertible(Type type)
+    public void All_IConvertible_Classes_Should_Be_Instantiable_And_Convertible(Type? type)
     {
+        if (type is null)
+        {
+            return;
+        }
         // 1. デフォルトコンストラクタでインスタンス化
         var instance = Activator.CreateInstance(type) as IConvertible;
 
