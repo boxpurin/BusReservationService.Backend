@@ -6,7 +6,8 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 CREATE TABLE IF NOT EXISTS "public"."accounts" (
    "id" "uuid" PRIMARY KEY default "gen_random_uuid"(), -- アカウントID（データベース用）
    "email" "text" UNIQUE NOT NULL, -- メールアドレス（ログインID）
-   "password_hash" "text" NOT NULL, -- パスワードハッシュ
+   "password_hash" "bytea" NOT NULL, -- パスワードハッシュ
+   "password_salt" "bytea" NOT NULL, -- パスワードソルト
    "account_status" "text" NOT NULL DEFAULT 'pending_email_verification' CHECK (
        account_status IN (
         'just_created',
@@ -39,9 +40,15 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
    "first_name" "text" NOT NULL,
    "last_name" "text" NOT NULL,
    "zip_code" varchar(7) NOT NULL,
-   "address" "text" NOT NULL,
-   "phone" "text" NOT NULL,
-   "fax" "text",
+   "street_address" "text" NOT NULL,
+   "phone_number" "text" NOT NULL,
+   "fax_number" "text",
+   "user_type" "text" NOT NULL CHECK(
+      user_type IN (
+         'personal',
+         'business',
+         'administrator'
+   )),
    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
    "updated_at" timestamp with time zone DEFAULT "now"() NOT null
 );
@@ -56,9 +63,9 @@ CREATE TABLE IF NOT EXISTS "public"."campanies" (
    ON DELETE cascade,
    "name" "text" NOT NULL,
    "zip_code" varchar(7) NOT NULL,
-   "address" "text" NOT NULL,
-   "phone" "text" NOT NULL,
-   "fax" "text",
+   "street_address" "text" NOT NULL,
+   "phone_number" "text" NOT NULL,
+   "fax_number" "text",
    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
@@ -80,12 +87,12 @@ CREATE TABLE IF NOT EXISTS "public"."parking_lots" (
    ON UPDATE CASCADE
    ON DELETE NO ACTION,
    "zip_code" varchar(7) NOT NULL,
-   "address" "text" NOT NULL,
-   "phone" "text" NOT NULL,
-   "fax" "text",
-   "total_capacity" smallint NOT NULL,
+   "street_address" "text" NOT NULL,
+   "phone_number" "text" NOT NULL,
+   "fax_number" "text",
+   "max_capacity" smallint NOT NULL,
    "reservation_capacity" smallint NOT NULL,
-   "allows_boarding_alighting" boolean DEFAULT false NOT NULL,
+   "is_allows_boarding_alighting" boolean DEFAULT false NOT NULL,
    "is_active" boolean DEFAULT false NOT NULL,
    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
@@ -108,7 +115,7 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
   
    "incoming" timestamp with time zone NOT NULL,
    "outgoing" timestamp with time zone NOT NULL,
-   "status" "text" default 'pending'
+   "reservation_status" "text" default 'pending'
    CHECK (status IN (
        'pending', -- 予約待ち
        'confirmed', -- 予約確定
