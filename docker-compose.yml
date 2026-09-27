@@ -3,9 +3,9 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
+      POSTGRES_USER: ${RESERVATION_SERVICE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${RESERVATION_SERVICE_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${RESERVATION_SERVICE_POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
