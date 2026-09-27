@@ -1,11 +1,6 @@
-﻿namespace BusReservationService.Domain.Entity;
+﻿using BusReservationService.Domain.ValueObject;
 
-public enum ReservationStatus
-{
-    Pending,
-    Confirmed,
-    Canceled,
-}
+namespace BusReservationService.Domain.Entity;
 
 public class ReservationEntity
 
