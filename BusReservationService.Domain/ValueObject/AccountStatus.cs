@@ -1,6 +1,4 @@
-﻿using System.Net.NetworkInformation;
-
-namespace BusReservationService.Domain.ValueObject;
+﻿namespace BusReservationService.Domain.ValueObject;
 
 public enum AccountStatus
 {

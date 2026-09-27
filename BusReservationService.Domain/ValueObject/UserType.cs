@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BusReservationService.Domain.ValueObject;
+﻿namespace BusReservationService.Domain.ValueObject;
 public enum UserType
 {
     // 個人顧客
