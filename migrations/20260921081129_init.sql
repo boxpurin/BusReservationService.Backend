@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
    "incoming" timestamp with time zone NOT NULL,
    "outgoing" timestamp with time zone NOT NULL,
    "reservation_status" "text" default 'pending'
-   CHECK (status IN (
+   CHECK (reservation_status IN (
        'pending', -- 予約待ち
        'confirmed', -- 予約確定
        'cancelled', -- 予約キャンセル

@@ -1,15 +1,45 @@
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: >-
+        Host=db;
+        Port=5432;
+        Database=${RESERVATION_SERVICE_POSTGRES_DB};
+        Username=${RESERVATION_SERVICE_POSTGRES_USER};
+        Password=${RESERVATION_SERVICE_POSTGRES_PASSWORD};
+    ports:
+      - "${RESERVATION_SERVICE_API_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    init: true
   db:
     image: postgres:16-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${RESERVATION_SERVICE_POSTGRES_USER}
       POSTGRES_PASSWORD: ${RESERVATION_SERVICE_POSTGRES_PASSWORD}
       POSTGRES_DB: ${RESERVATION_SERVICE_POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${RESERVATION_SERVICE_POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./migrations/20260921081129_init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 volumes:
   postgres_data:
