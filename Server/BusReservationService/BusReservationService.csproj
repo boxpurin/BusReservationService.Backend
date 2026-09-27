@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>373d39ee-fb32-407e-89e6-839bc12b365c</UserSecretsId>
-    <BaseOutputPath>../bin</BaseOutputPath>
+    <BaseOutputPath>../../bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,15 +24,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dto\Response\" />
     <Folder Include="Endpoints\ParkingLot\" />
     <Folder Include="Endpoints\Admin\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BusReservationService.Database\BusReservationService.Database.csproj" />
-    <ProjectReference Include="..\BusReservationService.Domain\BusReservationService.Domain.csproj" />
-    <ProjectReference Include="..\BusReservationService.Share\BusReservationService.Share.csproj" />
+    <ProjectReference Include="..\..\Infra\Database\BusReservationService.Database.csproj" />
+    <ProjectReference Include="..\..\BusReservationService.Domain\BusReservationService.Domain.csproj" />
+    <ProjectReference Include="..\..\BusReservationService.Share\BusReservationService.Share.csproj" />
   </ItemGroup>
 
 </Project>

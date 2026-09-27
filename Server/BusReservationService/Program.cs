@@ -4,6 +4,7 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Models;
 using BusReservationService.Services;
 using BusReservationService.Services.Interface;
+using BusReservationService.Services.Query;
 using FastEndpoints;
 using FastEndpoints.Security;
 using System.Data;
@@ -28,11 +29,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<ISessionService<Guid, SessionValue>, InMemorySessionService>();
 
 // Application Service
-builder.Services.AddScoped<IAccountService, AuthService>();
-builder.Services.AddScoped<IUserService, UserService>();
 
 // Application Query Service
-
+builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
 
 builder.Services
    .AddAuthenticationCookie(validFor: TimeSpan.FromMinutes(3), options: options =>
