@@ -37,7 +37,7 @@ public class UserEntity
     }
 
     public static UserEntity CreateUserEntity(
-        Guid accountId , 
+        AccountEntity accountEntity , 
         string firstName, 
         string lastName,  
         string zipCode, 
@@ -47,7 +47,7 @@ public class UserEntity
         UserType userType)
     {
         return new UserEntity(
-            accountId,
+            accountEntity.Id,
             firstName, 
             lastName,  
             zipCode, 

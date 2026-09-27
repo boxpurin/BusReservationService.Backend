@@ -56,7 +56,7 @@ public class Activate(
         }
 
         var entity = UserEntity.CreateUserEntity(
-            session.AccountId, 
+            account, 
             req.FirstName, 
             req.LastName,
             req.ZipCode,
