@@ -57,4 +57,27 @@ public class UserEntity
             userType
         );
     }
+
+    
+    public static UserEntity CreateUserEntity(
+        Guid accountId, 
+        string firstName, 
+        string lastName,  
+        string zipCode, 
+        string streetAddress,
+        string phoneNumber, 
+        string faxNumber, 
+        UserType userType)
+    {
+        return new UserEntity(
+            accountId,
+            firstName, 
+            lastName,  
+            zipCode, 
+            streetAddress,  
+            phoneNumber, 
+            faxNumber, 
+            userType
+        );
+    }
 }
