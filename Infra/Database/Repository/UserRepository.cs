@@ -71,7 +71,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
         var ret = await Connection.QueryFirstAsync<UserTable>(sql, entity);
         tx.Commit();
 
-        return ret.ToEntity();
+        return ret.ToDomain();
     }
 
     public async Task<UserEntity[]> UpdateListAsync(UserEntity[] entity)
@@ -109,7 +109,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
 
         var ret = await Connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
         
-        return ret?.ToEntity();
+        return ret?.ToDomain();
     }
     public async Task<bool> ExistByAccountId(Guid accountId)
     {

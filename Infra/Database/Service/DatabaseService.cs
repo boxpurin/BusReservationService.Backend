@@ -1,8 +1,8 @@
-﻿using BusReservationService.Database.Enum;
-using Dapper;
+﻿using System.Data;
+using BusReservationService.Database.Enums;
 using Microsoft.Extensions.Configuration;
+using Dapper;
 using Npgsql;
-using System.Data;
 
 namespace BusReservationService.Database.Service;
 

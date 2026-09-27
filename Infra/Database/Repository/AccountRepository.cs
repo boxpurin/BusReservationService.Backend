@@ -21,8 +21,8 @@ public class AccountRepository : IAccountRepository
         using var tx = _connection.BeginTransaction();
 
         const string sql = """
-                INSERT INTO public.accounts (id, email, password_hash, account_status, account_role)
-                VALUES (@Id, @Email, @Password, @AccountStatus, @AccountRole)
+                INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
+                VALUES (@Id, @Email, @PasswordHash, @PasswordSalt @AccountStatus, @AccountRole)
                 RETURNING * AS account;
             """;
 
@@ -30,7 +30,7 @@ public class AccountRepository : IAccountRepository
 
         tx.Commit();
 
-        return ret.ToEntity();
+        return ret.ToDomain();
     }
 
     public async Task<AccountEntity[]> AddListAsync(AccountEntity[] accounts)
@@ -38,8 +38,8 @@ public class AccountRepository : IAccountRepository
         using var tx = _connection.BeginTransaction();
 
         const string sql = """                
-                INSERT INTO public.accounts (id, email, password_hash, account_status, account_role)
-                VALUES (@Id, @Email, @Password, @AccountStatus, @AccountRole)
+                INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
+                VALUES (@Id, @Email, @PasswordHash, @PasswordSalt, @AccountStatus, @AccountRole)
                 RETURNING * AS account;
                 """;
 
@@ -47,7 +47,7 @@ public class AccountRepository : IAccountRepository
 
         tx.Commit();
 
-        return ret is not null ? ret.Select(t => t.ToEntity()).ToArray() : [];
+        return ret is not null ? ret.Select(t => t.ToDomain()).ToArray() : [];
     }
 
 
@@ -59,7 +59,8 @@ public class AccountRepository : IAccountRepository
                 UPDATE public.accounts
                 SET 
                 email = @Email , 
-                password_hash = @Password , 
+                password_hash = @PasswordHash,
+                password_salt = @PasswordSalt, 
                 account_status = @AccountStatus ,
                 account_role = @AccountRole , 
                 lastLoginAt = @LastLoginAt 
@@ -71,7 +72,7 @@ public class AccountRepository : IAccountRepository
 
         tx.Commit();
 
-        return ret.ToEntity();
+        return ret.ToDomain();
     }
 
     public async Task<AccountEntity[]> UpdateListAsync(AccountEntity[] account)
@@ -92,7 +93,7 @@ public class AccountRepository : IAccountRepository
 
         var ret = await _connection.QueryAsync<AccountTable>(sql);
 
-        return ret.Select(t => t.ToEntity()).ToArray();
+        return ret.Select(t => t.ToDomain()).ToArray();
     }
 
     public async Task<AccountEntity?> FindByAccountId(Guid accountId)
@@ -103,7 +104,7 @@ public class AccountRepository : IAccountRepository
 
         var ret = await _connection.QueryFirstAsync<AccountTable>(sql, new { Id = accountId});
 
-        return ret?.ToEntity();
+        return ret?.ToDomain();
     }
     public async Task<AccountEntity?> FindByEmail(string email)
     {
@@ -113,7 +114,7 @@ public class AccountRepository : IAccountRepository
 
         var ret = await _connection.QueryFirstAsync<AccountTable>(sql, new { Email = email });
 
-        return ret?.ToEntity();
+        return ret?.ToDomain();
     }
 
     public async Task<bool> IsExistByAccountId(Guid accountId)
