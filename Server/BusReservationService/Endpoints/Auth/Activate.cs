@@ -56,18 +56,27 @@ public class Activate(
         }
 
         var entity = UserEntity.CreateUserEntity(
-            account, 
+            session.AccountId, 
             req.FirstName, 
             req.LastName,
             req.ZipCode,
             req.StreetAdress,
             req.PhoneNumber,
-            req.FaxNumber!,
+            req.FaxNumber,
             req.UserType
         );
 
         // ユーザーの登録
-        var user = await UserRepository.AddAsymc(entity);
+        var user = await UserRepository.AddAsymc(new AddAsymcDto(
+            session.AccountId, 
+            req.FirstName, 
+            req.LastName,
+            req.ZipCode,
+            req.StreetAdress,
+            req.PhoneNumber,
+            req.FaxNumber,
+            req.UserType
+        ));
 
         // アカウントの有効化
         account.Activate();
