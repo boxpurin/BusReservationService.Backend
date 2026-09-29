@@ -15,7 +15,7 @@ public class UserTable : IConvertibleToDomain<UserEntity>
     public string ZipCode { get; set; } = string.Empty;
     public string StreetAddress { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
-    public string FaxNumber { get; set; } = string.Empty;
+    public string? FaxNumber { get; set; }
     public UserType UserType { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

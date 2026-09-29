@@ -13,7 +13,7 @@ public class UserEntity
     public string ZipCode { get; private set; } 
     public string StreetAddress { get; private set; }
     public string PhoneNumber { get; private set; }
-    public string FaxNumber { get; private set; }
+    public string? FaxNumber { get; private set; }
     public UserType UserType { get; private set; }
 
     private UserEntity(
@@ -23,7 +23,7 @@ public class UserEntity
         string zipCode, 
         string streetAddress,
         string phoneNumber, 
-        string faxNumber, 
+        string? faxNumber, 
         UserType userType)
     {
         AccountId = accountId;
