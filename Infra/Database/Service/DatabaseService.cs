@@ -27,6 +27,15 @@ public class DatabaseService
         SqlMapper.AddTypeHandler(
             typeof(AccountRole),
             new LowercaseEnumTypeHandler<AccountRole>());
+
+        SqlMapper.AddTypeHandler(
+            typeof(UserType),
+            new LowercaseEnumTypeHandler<UserType>());
+        
+        SqlMapper.AddTypeHandler(
+            typeof(ReservationStatus),
+            new LowercaseEnumTypeHandler<ReservationStatus>());
+        
     }
 
     public IDbConnection CreateConnection()
