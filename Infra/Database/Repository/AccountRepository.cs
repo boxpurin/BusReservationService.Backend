@@ -33,23 +33,6 @@ public class AccountRepository : IAccountRepository
         return ret.ToDomain();
     }
 
-    public async Task<AccountEntity[]> AddListAsync(AccountEntity[] accounts)
-    {
-        using var tx = _connection.BeginTransaction();
-
-        const string sql = """                
-                INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
-                VALUES (@Id, @Email, @PasswordHash, @PasswordSalt, @AccountStatus, @AccountRole)
-                RETURNING * AS account;
-                """;
-
-        var ret = await _connection.QueryAsync<AccountTable>(sql, accounts, tx);
-
-        tx.Commit();
-
-        return ret is not null ? ret.Select(t => t.ToDomain()).ToArray() : [];
-    }
-
 
     public async Task<AccountEntity> UpdateAsync(AccountEntity account)
     {
@@ -75,15 +58,6 @@ public class AccountRepository : IAccountRepository
         return ret.ToDomain();
     }
 
-    public async Task<AccountEntity[]> UpdateListAsync(AccountEntity[] account)
-    {
-        using var tx = _connection.BeginTransaction();
-
-
-
-        tx.Commit();
-        throw new NotImplementedException();
-    }
 
     public async Task<AccountEntity[]> GetAllAsync()
     {

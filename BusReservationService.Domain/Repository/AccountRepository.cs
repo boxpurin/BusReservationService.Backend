@@ -1,15 +1,12 @@
 ﻿using BusReservationService.Domain.Entity;
-using BusReservationService.Share;
 
 namespace BusReservationService.Domain.Repository;
 
 public interface IAccountRepository
 {
     Task<AccountEntity> AddAsync(AccountEntity account);
-    Task<AccountEntity[]> AddListAsync(AccountEntity[] account);
 
     Task<AccountEntity> UpdateAsync(AccountEntity account);
-    Task<AccountEntity[]> UpdateListAsync(AccountEntity[] account);
 
     Task<AccountEntity[]> GetAllAsync();
     Task<AccountEntity?> FindByAccountId(Guid accountId);

@@ -17,11 +17,6 @@ public class ParkingLotRepository : IParkingLotRepository
         throw new NotImplementedException();
     }
 
-    public Task<ParkingLotEntity[]> AddListAsync(ParkingLotEntity[] entity)
-    {
-        throw new NotImplementedException();
-    }
-
     public Task<bool> ExistByParkingLotIdAsync(Guid parkingLotId)
     {
         throw new NotImplementedException();
@@ -43,11 +38,6 @@ public class ParkingLotRepository : IParkingLotRepository
     }
 
     public Task<ParkingLotEntity> UpdateAsync(ParkingLotEntity entity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<ParkingLotEntity[]> UpdateListAsync(ParkingLotEntity[] entity)
     {
         throw new NotImplementedException();
     }

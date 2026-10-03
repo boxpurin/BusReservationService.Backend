@@ -6,11 +6,15 @@ public interface IReservationRepository
 {
     // 引数が多いのでこういうのはDtoにしてしまうべき気がする
     Task<ReservationEntity> AddAsync(ReservationEntity reservation);
-    Task<ReservationEntity[]> AddListAsync(ReservationEntity[] reservations);
 
     Task<ReservationEntity> UpdateAsync(ReservationEntity reservation);
-    Task<ReservationEntity[]> UpdateListAsync(ReservationEntity[] reservations);
 
+
+    /// <summary>
+    /// 予約IDから予約情報を取得する
+    /// </summary>
+    /// <param name="reservationId">予約ID</param>
+    /// <returns></returns>
     Task<ReservationEntity?> FindByReservationIdAsync(Guid reservationId);
     Task<ReservationEntity?> FindByAccountIdAsync(Guid accountId);
 
