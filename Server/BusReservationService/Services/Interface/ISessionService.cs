@@ -4,7 +4,7 @@ public abstract class ISessionService<K, V> where K : notnull
 {
     protected IDictionary<K, V> SessionStorage { get; private set; } = new Dictionary<K, V>();
 
-    public V this[K key]
+    public V? this[K key]
     {
         get { return SessionStorage[key]; }
         set { SessionStorage[key] = value; }
