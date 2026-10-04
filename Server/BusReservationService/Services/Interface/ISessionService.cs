@@ -7,7 +7,16 @@ public abstract class ISessionService<K, V> where K : notnull
     public V? this[K key]
     {
         get { return SessionStorage[key]; }
-        set { SessionStorage[key] = value; }
+        set { 
+                if (value is null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Session value cannot be null.");
+                }
+                else
+                {
+                    SessionStorage[key] = value; 
+                }
+            }
     }
 
     public abstract K CreateRandomKeySession(V value);
