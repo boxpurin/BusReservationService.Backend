@@ -2,7 +2,7 @@
 
 namespace BusReservationService.Database.Enums;
 
-public enum AccountStatus
+internal enum AccountStatus
 {
     JustCreated,
     PendingEmailVerify,
@@ -11,7 +11,7 @@ public enum AccountStatus
     Suspended,
 }
 
-public static class AccountStatusExtensions
+internal static class AccountStatusExtensions
 {
     public static AccountStatusDomain ToDomain(this AccountStatus status) 
     => Enum.Parse<AccountStatusDomain>(status.ToString());

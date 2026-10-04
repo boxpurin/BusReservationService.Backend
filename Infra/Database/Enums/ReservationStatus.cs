@@ -2,7 +2,7 @@
 
 namespace BusReservationService.Database.Enums;
 
-public enum ReservationStatus
+internal enum ReservationStatus
 {
     Pending,
     Confirmed,
@@ -10,7 +10,7 @@ public enum ReservationStatus
     Canceled,
 }
 
-public static class ReservationStatusExtension
+internal static class ReservationStatusExtension
 {
     public static ReservationStatusDomain ToDomain(this ReservationStatus status) 
     => Enum.Parse<ReservationStatusDomain>(status.ToString());

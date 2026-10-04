@@ -7,7 +7,7 @@ namespace BusReservationService.Database.Table;
 /// <summary>
 /// 人そのもの
 /// </summary>
-public class UserTable : IConvertibleToDomain<UserEntity>
+internal class UserTable : IConvertibleToDomain<UserEntity>
 {
     public Guid AccountId { get; set; }
     public string FirstName { get; set; } = string.Empty;

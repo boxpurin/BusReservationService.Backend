@@ -23,7 +23,7 @@ public class TypeHandler_UnitTest
     [InlineData("on_boarding", AccountStatus.OnBoarding)]
     [InlineData("active", AccountStatus.Active)]
     [InlineData("suspended", AccountStatus.Suspended)]
-    public void Parse_ShouldBeFromSnakeCase_WithTypeHandler(string val, AccountStatus expected)
+    internal void Parse_ShouldBeFromSnakeCase_WithTypeHandler(string val, AccountStatus expected)
     {
         var result = AccountStatusHandler.Parse(val);
         result.Should().Be(expected);
@@ -35,7 +35,7 @@ public class TypeHandler_UnitTest
     [InlineData("on_boarding", AccountStatus.OnBoarding)]
     [InlineData("active", AccountStatus.Active)]
     [InlineData("suspended", AccountStatus.Suspended)]
-    public void SetValue_ShouldConvertValueAndType_WithoutMock(string expected, AccountStatus val)
+    internal void SetValue_ShouldConvertValueAndType_WithoutMock(string expected, AccountStatus val)
     {
         var mockParam = new Mock<IDbDataParameter>();
 

@@ -1,7 +1,7 @@
 using UserTypeDomain = BusReservationService.Domain.ValueObject.UserType;
 namespace BusReservationService.Database.Enums;
 
-public enum UserType
+internal enum UserType
 {
     // 個人顧客
     Personal,
@@ -10,7 +10,7 @@ public enum UserType
     // 管理者
     Administrator,
 }
-public static class UserTypeExtension
+internal static class UserTypeExtension
 {
     public static UserTypeDomain ToDomain(this UserType userType) => 
     Enum.Parse<UserTypeDomain>(userType.ToString());
