@@ -27,6 +27,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Session Management Service
 builder.Services.AddSingleton<ISessionService<Guid, SessionValue>, InMemorySessionService>();
+builder.Services.AddSingleton<ISessionService<Guid, ActivationSessionValue>, InMemoryActivationSessionService>();
 
 // Application Service
 
