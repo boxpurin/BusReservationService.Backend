@@ -1,7 +1,8 @@
 <Solution>
   <Folder Name="/Infra/">
     <Project Path="Infra/Database.Test/BusReservationService.Database.Test.csproj" />
-  <Project Path="Infra/Database/BusReservationService.Database.csproj" Id="1b9c9352-4be8-415d-9e4a-fd95d922cc9d" />
+    <Project Path="Infra/Database/BusReservationService.Database.csproj" Id="1b9c9352-4be8-415d-9e4a-fd95d922cc9d" />
+    <Project Path="Infra/Redis/BusReservationService.Redis.csproj" />
   </Folder>
 
   <Folder Name="/Server/">
