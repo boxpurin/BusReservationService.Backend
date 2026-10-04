@@ -19,28 +19,20 @@ public class ReservationRepository : IReservationRepository
     {
         throw new NotImplementedException();
     }
-
-    public async Task<ReservationEntity[]> AddListAsync(ReservationEntity[] reservations)
-    {
-        throw new NotImplementedException();
-    }
     public async Task<ReservationEntity> UpdateAsync(ReservationEntity reservation)
     {
         throw new NotImplementedException();
     }
-
-    public async Task<ReservationEntity[]> UpdateListAsync(ReservationEntity[] reservations)
-    {
-        throw new NotImplementedException();
-    }
-
-
-    public async Task<ReservationEntity?> FindByAccountIdAsync(Guid accountId)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<ReservationEntity?> FindByReservationIdAsync(Guid reservationId)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<ReservationEntity[]> FindByAccountIdAsync(Guid accountId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ReservationEntity[]> FindByParkingLotIdAsync(Guid parkingLotId)
     {
         throw new NotImplementedException();
     }

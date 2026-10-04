@@ -4,21 +4,56 @@ using BusReservationService.Share;
 namespace BusReservationService.Domain.Repository;
 public interface IReservationRepository
 {
-    // 引数が多いのでこういうのはDtoにしてしまうべき気がする
+    /// <summary>
+    /// 予約情報を追加する
+    /// </summary>
+    /// <param name="reservation">予約情報</param>
+    /// <returns></returns>
     Task<ReservationEntity> AddAsync(ReservationEntity reservation);
-    Task<ReservationEntity[]> AddListAsync(ReservationEntity[] reservations);
 
     Task<ReservationEntity> UpdateAsync(ReservationEntity reservation);
-    Task<ReservationEntity[]> UpdateListAsync(ReservationEntity[] reservations);
 
+
+    /// <summary>
+    /// 予約IDから予約情報を取得する
+    /// </summary>
+    /// <param name="reservationId">予約ID</param>
+    /// <returns></returns>
     Task<ReservationEntity?> FindByReservationIdAsync(Guid reservationId);
-    Task<ReservationEntity?> FindByAccountIdAsync(Guid accountId);
 
+    /// <summary>
+    /// 予約者のアカウントIDから予約情報一覧を取得する
+    /// </summary>
+    /// <param name="accountId">予約者のアカウントID</param>
+    /// <returns></returns>
+    Task<ReservationEntity[]> FindByAccountIdAsync(Guid accountId);
+
+    /// <summary>
+    /// 駐車場IDから予約情報一覧を取得する
+    /// </summary>
+    /// <param name="parkingLotId">駐車場ID</param>
+    /// <returns></returns>
+    Task<ReservationEntity[]> FindByParkingLotIdAsync(Guid parkingLotId);
+
+    /// <summary>
+    /// 予約IDが存在するかどうかを確認する
+    /// </summary>
+    /// <param name="reservationId">予約ID</param>
+    /// <returns></returns>
     Task<bool?> ExistByReservationIdAsync(Guid reservationId);
+
+    /// <summary>
+    /// 予約者のアカウントIDが存在するかどうかを確認する
+    /// </summary>
+    /// <param name="accountId">予約者のアカウントID</param>
+    /// <returns></returns>
     Task<bool> ExistByAccountIdAsync(Guid accountId);
 
-    // 予約内容そのものの削除、解約
-    // 削除は個人情報保護の観点
+    /// <summary>
+    /// 予約IDから予約情報を削除する
+    /// </summary>
+    /// <param name="reservationId">予約ID</param>
+    /// <returns></returns>
     Task<bool> DeleteByReservationIdAsync(Guid reservationId);
 
 }

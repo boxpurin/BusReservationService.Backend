@@ -7,9 +7,7 @@ namespace BusReservationService.Domain.Repository;
 public interface IUserRepository
 {
     Task<UserEntity> AddAsymc(AddAsymcDto dto);
-    Task<UserEntity[]> AddListAsync(UserEntity[] entity);
     Task<UserEntity> UpdateAsync(UserEntity entity);
-    Task<UserEntity[]> UpdateListAsync(UserEntity[] entity);
     Task<UserEntity?> FindByAccountId(Guid accountId);
     Task<bool> ExistByAccountId(Guid accountId);
     Task<bool> DeleteById(Guid accountId);

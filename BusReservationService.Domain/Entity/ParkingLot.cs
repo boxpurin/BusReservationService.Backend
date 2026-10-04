@@ -9,6 +9,7 @@ public class ParkingLotEntity
     public short PrefectureId { get; set; }
     public required string StreetAddress { get; set; }
     public required string PhoneNumber { get; set; }
+    public string? FaxNumber { get; set; }
     public short MaxCapacity { get; set; }
     public short ReservationCapacity { get; set; }
 }
