@@ -5,12 +5,13 @@ using System.Text.RegularExpressions;
 
 namespace BusReservationService.Database.Enums;
 
-public class LowercaseEnumTypeHandler<T> : SqlMapper.TypeHandler<T> where T : struct, Enum
+internal class LowercaseEnumTypeHandler<T> : SqlMapper.TypeHandler<T> where T : struct, Enum
 {
     // DBへの書き込み時 (C# -> SQL)
     public override void SetValue(IDbDataParameter parameter, T value)
     { 
-        parameter.Value = Regex.Replace(value.ToString(), "(?<!^)([A-Z])", "_$1").ToLower();;
+        parameter.Value = Regex.Replace(value.ToString(), "(?<!^)([A-Z])", "_$1").ToLower();
+        Console.WriteLine(parameter.Value);
         parameter.DbType = DbType.String;
     }
 

@@ -2,7 +2,7 @@
 
 namespace BusReservationService.Database.Enums;
 
-public enum AccountRole
+internal enum AccountRole
 {
     Guest,
     User,
@@ -10,7 +10,7 @@ public enum AccountRole
     LotAdmin,
 }
 
-public static class AccountRoleExtensions
+internal static class AccountRoleExtensions
 {
     public static AccountRoleDomain ToDomain(this AccountRole role) => 
     Enum.Parse<AccountRoleDomain>(role.ToString());

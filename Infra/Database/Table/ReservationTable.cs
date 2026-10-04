@@ -5,7 +5,7 @@ using BusReservationService.Share;
 
 namespace BusReservationService.Database.Table;
 
-public class ReservationTable : IConvertibleToDomain<ReservationEntity>
+internal class ReservationTable : IConvertibleToDomain<ReservationEntity>
 {
     public Guid Id { get; set; }
     public Guid AccountId { get; set; }
