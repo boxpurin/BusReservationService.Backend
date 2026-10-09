@@ -72,7 +72,7 @@ public sealed class RedisTicketStore(IConnectionMultiplexer redis) : ITicketStor
             return null;
         }
 
-        return TicketSerializer.Default.Deserialize(value);
+        return TicketSerializer.Default.Deserialize(value!);
     }
     public async Task<AuthenticationTicket?> RetrieveAsync(
         string key,
@@ -85,7 +85,7 @@ public sealed class RedisTicketStore(IConnectionMultiplexer redis) : ITicketStor
             return null;
         }
 
-        return TicketSerializer.Default.Deserialize(data);
+        return TicketSerializer.Default.Deserialize(data!);
     }
 
     public async Task RemoveAsync(string key)
