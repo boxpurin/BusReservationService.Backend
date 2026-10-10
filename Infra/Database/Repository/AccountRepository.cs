@@ -18,8 +18,8 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
         const string sql = """
                 INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
-                VALUES (@Id, @Email, @PasswordHash, @PasswordSalt @AccountStatus, @AccountRole)
-                RETURNING * AS account;
+                VALUES (@Id, @Email, @PasswordHash, @PasswordSalt, @AccountStatus, @AccountRole)
+                RETURNING *;
             """;
 
         var ret = await _connection.QueryFirstAsync<AccountTable>(sql, account, tx);
