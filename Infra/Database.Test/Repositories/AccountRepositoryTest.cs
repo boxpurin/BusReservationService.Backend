@@ -22,12 +22,17 @@ public class UserRepositoryTest : IAsyncLifetime
     .WithUsername("postgres")
     .WithPassword("password")
     .WithBindMount(
-        Path.GetFullPath("../../../migrations/20260921081129_init.sql"), 
-        "/docker-entrypoint-initdb.d/init.sql", 
+        Path.GetFullPath("../../../Infra/Database/Migrations/20260911084734_init.sql"), 
+        "/docker-entrypoint-initdb.d/01_init.sql", 
+        AccessMode.ReadOnly)
+    .WithBindMount(
+        Path.GetFullPath("../../../Infra/Database.Test/Sql/Seeds/001_accounts.sql"), 
+        "/docker-entrypoint-initdb.d/02_accounts.sql", 
         AccessMode.ReadOnly)
     .Build();
 
     private DatabaseService? dbService = null;
+
 
     public async Task InitializeAsync()
     {        
@@ -58,8 +63,7 @@ public class UserRepositoryTest : IAsyncLifetime
     [Fact]
     public async Task AddAsync_Test()
     {
-        IAccountRepository accountRepository = new AccountRepository
-        (
+        IAccountRepository accountRepository = new AccountRepository(
             CreateConnection()
         );
 
@@ -79,6 +83,17 @@ public class UserRepositoryTest : IAsyncLifetime
         result.AccountRole.Should().Equals(account.AccountRole);
         result.ActivatedAt.Should().BeNull();
         result.LastLoginAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task If_Exist_Account_Then_FindByEmail_Should_NotBeNull()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var account = await accountRepository!.FindByEmail("test1@example.com");
+        account.Should().NotBeNull();
     }
 
     public Task DisposeAsync()
