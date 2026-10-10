@@ -22,7 +22,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 RETURNING *;
             """;
 
-        var ret = await _connection.QueryFirstAsync<AccountTable>(sql, account, tx);
+        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account, tx);
 
         tx.Commit();
 
@@ -48,7 +48,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 RETURNING *;
             """;
 
-        var ret = await _connection.QueryFirstAsync<AccountTable>(sql, account, tx);
+        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account, tx);
 
         tx.Commit();
 
@@ -63,7 +63,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
             SELECT * from public.accounts;
             """;
 
-        var ret = await _connection.QueryAsync<AccountTable>(sql);
+        var ret = await connection.QueryAsync<AccountTable>(sql);
 
         return ret.Select(t => t.ToDomain()).ToArray();
     }
@@ -75,7 +75,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
             SELECT * from public.accounts WHERE id = @Id;
             """;
 
-        var ret = await _connection.QueryFirstAsync<AccountTable>(sql, new { Id = accountId});
+        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Id = accountId});
 
         return ret?.ToDomain();
     }
@@ -86,7 +86,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
             SELECT * from public.accounts WHERE email = @Email;
             """;
 
-        var ret = await _connection.QueryFirstAsync<AccountTable>(sql, new { Email = email });
+        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Email = email });
 
         return ret?.ToDomain();
     }
@@ -98,7 +98,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
             SELECT * from public.accounts WHERE id = @Id;
             """;
 
-        var ret = await _connection.QueryFirstAsync<AccountTable>(sql, new { Id = accountId });
+        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Id = accountId });
 
         return ret is not null;
 
@@ -111,7 +111,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
             SELECT * from public.accounts WHERE email = @Email;
             """;
 
-        var ret = await _connection.QueryFirstAsync<AccountTable>(sql, new { Email = email });
+        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Email = email });
 
         return ret is not null;
     }
@@ -129,7 +129,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
             DELETE accounts WHERE Id = @Id;
             """;
 
-        var ret = await _connection.ExecuteAsync(sql, account, tx);
+        var ret = await connection.ExecuteAsync(sql, account, tx);
 
         tx.Commit();
 
