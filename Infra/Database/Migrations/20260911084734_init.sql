@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "public"."accounts" (
    "password_salt" "bytea" NOT NULL, -- パスワードソルト
    "account_status" "text" NOT NULL DEFAULT 'pending_email_verification' CHECK (
        account_status IN (
-        'just_created',
+         'just_created',
        'pending_email_verification', -- メールアドレス確認待ち
        'onboarding', -- オンボーディング中(プロフィール入力待ち)
        'activated', -- 有効化済み
