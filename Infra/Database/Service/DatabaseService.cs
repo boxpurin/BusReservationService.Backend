@@ -20,6 +20,9 @@ public class DatabaseService
     // Dapperのマッピング設定
     public void ConfigureMappings()
     {
+        SqlMapper.Settings.PreferTypeHandlersForEnums = true;
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
+        
         SqlMapper.AddTypeHandler(
             typeof(AccountStatus),
             new LowercaseEnumTypeHandler<AccountStatus>());
@@ -36,6 +39,21 @@ public class DatabaseService
             typeof(ReservationStatus),
             new LowercaseEnumTypeHandler<ReservationStatus>());
         
+        SqlMapper.AddTypeHandler(
+            typeof(Domain.ValueObject.AccountStatus),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.AccountStatus>());
+
+        SqlMapper.AddTypeHandler(
+            typeof(Domain.ValueObject.AccountRole),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.AccountRole>());
+
+        SqlMapper.AddTypeHandler(
+            typeof(Domain.ValueObject.UserType),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.UserType>());
+
+        SqlMapper.AddTypeHandler(
+            typeof(Domain.ValueObject.ReservationStatus),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.ReservationStatus>());
     }
 
     public IDbConnection CreateConnection()
