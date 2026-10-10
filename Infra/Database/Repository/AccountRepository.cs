@@ -7,18 +7,13 @@ using System.Data;
 
 namespace BusReservationService.Database.Repository;
 
-public class AccountRepository : IAccountRepository
+public class AccountRepository(IDbConnection connection) : IConnection, IAccountRepository
 {
-    private readonly IDbConnection _connection;
-
-    public AccountRepository(IDbConnection connection)
-    {
-        _connection = connection;
-    }
-
     public async Task<AccountEntity> AddAsync(AccountEntity account)
     {
-        using var tx = _connection.BeginTransaction();
+        EnsureConnectionOpen(connection);
+
+        using var tx = connection.BeginTransaction();
 
         const string sql = """
                 INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
@@ -36,7 +31,8 @@ public class AccountRepository : IAccountRepository
 
     public async Task<AccountEntity> UpdateAsync(AccountEntity account)
     {
-        using var tx = _connection.BeginTransaction();
+        EnsureConnectionOpen(connection);
+        using var tx = connection.BeginTransaction();
 
         const string sql = """
                 UPDATE public.accounts
@@ -61,6 +57,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<AccountEntity[]> GetAllAsync()
     {
+        EnsureConnectionOpen(connection);
         var sql = """
             SELECT * from public.accounts;
             """;
@@ -72,6 +69,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<AccountEntity?> FindByAccountId(Guid accountId)
     {
+        EnsureConnectionOpen(connection);
         var sql = """
             SELECT * from public.accounts WHERE id = @Id;
             """;
@@ -82,6 +80,7 @@ public class AccountRepository : IAccountRepository
     }
     public async Task<AccountEntity?> FindByEmail(string email)
     {
+        EnsureConnectionOpen(connection);
         var sql = """
             SELECT * from public.accounts WHERE email = @Email;
             """;
@@ -93,6 +92,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<bool> IsExistByAccountId(Guid accountId)
     {
+        EnsureConnectionOpen(connection);
         var sql = """
             SELECT * from public.accounts WHERE id = @Id;
             """;
@@ -105,6 +105,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<bool> IsExistByEmail(string email)
     {
+        EnsureConnectionOpen(connection);
         var sql = """
             SELECT * from public.accounts WHERE email = @Email;
             """;
@@ -116,11 +117,13 @@ public class AccountRepository : IAccountRepository
 
     public async Task<bool> DeleteListAsync(AccountEntity[] account)
     {
+        EnsureConnectionOpen(connection);
         throw new NotImplementedException();
     }
     public async Task<bool> DeleteAsync(AccountEntity account)
     {
-        using var tx = _connection.BeginTransaction();
+        EnsureConnectionOpen(connection);
+        using var tx = connection.BeginTransaction();
         var sql = """
             DELETE accounts WHERE Id = @Id;
             """;

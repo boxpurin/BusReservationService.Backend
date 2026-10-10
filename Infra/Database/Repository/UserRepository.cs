@@ -1,4 +1,5 @@
 ﻿using BusReservationService.Database.Enums;
+using BusReservationService.Database.Interface;
 using BusReservationService.Database.Table;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
@@ -9,11 +10,11 @@ using System.Data;
 
 namespace BusReservationService.Database.Repository;
 
-public class UserRepository(IDbConnection Connection) : IUserRepository
+public class UserRepository(IDbConnection connection) : IConnection, IUserRepository
 {
     public async Task<UserEntity> AddAsymc(AddAsymcDto dto)
     {
-        using var tx = Connection.BeginTransaction();
+        using var tx = connection.BeginTransaction();
         const string sql = """
                 INSERT INTO users 
                 (account_id, first_name, last_name, zip_code, street_address, phone_number, fax_number, user_type)
@@ -22,7 +23,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
                 RETURNING * FROM users;
             """;
 
-        var userTable = await Connection.QueryFirstAsync<UserTable>(sql, dto, tx);        
+        var userTable = await connection.QueryFirstAsync<UserTable>(sql, dto, tx);        
         tx.Commit();
 
         return UserEntity.
@@ -39,7 +40,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
 
     public async Task<UserEntity> UpdateAsync(UserEntity entity)
     {
-        using var tx = Connection.BeginTransaction();
+        using var tx = connection.BeginTransaction();
         const string sql = """
                 UPDATE users
                 SET account_id = @AccountId ,
@@ -50,7 +51,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
                 WHERE account_id = @AccountId            
             """;
 
-        var userTable = await Connection.QueryFirstAsync<UserTable>(sql, entity);
+        var userTable = await connection.QueryFirstAsync<UserTable>(sql, entity);
         tx.Commit();
 
         return UserEntity.
@@ -67,7 +68,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
 
     public async Task<UserEntity?> FindByAccountId(Guid accountId)
     {
-        var accountTable = await Connection.QueryFirstAsync<AccountTable>("""
+        var accountTable = await connection.QueryFirstAsync<AccountTable>("""
         SELECT * FROM accounts WHERE Id = @AccountId ;
         """,
         new { AccountId = accountId });
@@ -79,7 +80,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
 
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
-        var userTable = await Connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
+        var userTable = await connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
 
         if ( userTable is null )
         {
@@ -101,7 +102,7 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
     {
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
-        var ret = await Connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
+        var ret = await connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
 
         return ret is not null;
     }
@@ -109,12 +110,11 @@ public class UserRepository(IDbConnection Connection) : IUserRepository
 
     public async Task<bool> DeleteById(Guid accountId)
     {
-        using var tx = Connection.BeginTransaction();
-        await Connection.ExecuteAsync("DELETE users WHERE account_id = @AccountId", new { AccountId = accountId });
+        using var tx = connection.BeginTransaction();
+        await connection.ExecuteAsync("DELETE users WHERE account_id = @AccountId", new { AccountId = accountId });
 
         tx.Commit();
 
         return true;
     }
-
 }
