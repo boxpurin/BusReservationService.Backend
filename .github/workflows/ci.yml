@@ -1,0 +1,31 @@
+name: CI - Tests Before PR / push
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: .NET Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Display dotnet version
+        run: dotnet --version
+
+      - name: Restore dependencies
+        run: dotnet restore BusReservationService.slnx
+
+      - name: Run tests
+        run: dotnet test
