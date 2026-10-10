@@ -45,7 +45,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 account_role = @AccountRole , 
                 lastLoginAt = @LastLoginAt 
                 WHERE id = @Id
-                RETURNING * AS account;
+                RETURNING *;
             """;
 
         var ret = await _connection.QueryFirstAsync<AccountTable>(sql, account, tx);
