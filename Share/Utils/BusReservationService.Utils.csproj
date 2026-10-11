@@ -4,11 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <BaseOutputPath>../bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BusReservationService.Share\BusReservationService.Share.csproj" />
+    <Folder Include="Error\" />
   </ItemGroup>
 
 </Project>

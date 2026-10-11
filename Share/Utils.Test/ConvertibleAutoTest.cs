@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using BusReservationService.Share;
 
-namespace BusReservationService.Test;
+namespace BusReservationService.Utils.Test;
 
 /// <summary>
 /// BusReservationService.Share.IConvertibleToDomain<T>

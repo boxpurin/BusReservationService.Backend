@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Database\BusReservationService.Database.csproj" />
-    <ProjectReference Include="..\..\BusReservationService.Domain\BusReservationService.Domain.csproj" />
-    <ProjectReference Include="..\..\BusReservationService.Share\BusReservationService.Share.csproj" />
+    <ProjectReference Include="..\..\Domain\BusReservationService.Domain.csproj" />
+    <ProjectReference Include="..\..\Shared\Utils\BusReservationService.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,9 +13,9 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="../../BusReservationService.Domain/BusReservationService.Domain.csproj" />
-    <ProjectReference Include="../../BusReservationService.Share/BusReservationService.Share.csproj" />
-    <ProjectReference Include="../../Server/BusReservationService/BusReservationService.csproj" />
+    <ProjectReference Include="../../Domain/BusReservationService.Domain.csproj" />
+    <ProjectReference Include="../../Shared/Utils/BusReservationService.Utils.csproj" />
+    <ProjectReference Include="../../Application/Server/BusReservationService/BusReservationService.csproj" />
   </ItemGroup>
 
   <ItemGroup>

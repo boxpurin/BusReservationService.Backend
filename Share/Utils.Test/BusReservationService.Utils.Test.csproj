@@ -5,7 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <BaseOutputPath>../bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +17,8 @@
   <ItemGroup>
     <ProjectReference Include="../Server/BusReservationService/BusReservationService.csproj" />
     <ProjectReference Include="../Infra/Database/BusReservationService.Database.csproj" />
-    <ProjectReference Include="../BusReservationService.Domain/BusReservationService.Domain.csproj" />
-    <ProjectReference Include="../BusReservationService.Share/BusReservationService.Share.csproj" />
+    <ProjectReference Include="../Domain/BusReservationService.Domain.csproj" />
+    <ProjectReference Include="../Shared/BusReservationService.Share/BusReservationService.Share.csproj" />
   </ItemGroup>
 
   <ItemGroup>
