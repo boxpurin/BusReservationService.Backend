@@ -5,7 +5,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>373d39ee-fb32-407e-89e6-839bc12b365c</UserSecretsId>
-    <BaseOutputPath>../../bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
