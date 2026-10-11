@@ -1,6 +1,6 @@
 <Solution>
 
-  <Folder Name"/Presentation/">
+  <Folder Name="/Presentation/">
 
   </Folder>
 
@@ -10,7 +10,7 @@
     <Project Path="Infra/Redis.Test/BusReservationService.Redis.Test.csproj" />
     <Project Path="Infra/Redis/BusReservationService.Redis.csproj" />
   </Folder>
-  
+
   <Folder Name="/Application/">
     <Project Path="Application/Server/BusReservationService/BusReservationService.csproj" />
   </Folder>
