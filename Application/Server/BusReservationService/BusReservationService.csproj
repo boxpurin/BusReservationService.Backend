@@ -28,9 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Core/BusReservationService.Application.Core.csproj" />
+    <ProjectReference Include="../../../Presentation/EndPoints/BusReservationService.Endpoints.csproj" />
     <ProjectReference Include="..\..\..\Infra\Database\BusReservationService.Database.csproj" />
     <ProjectReference Include="..\..\..\Domain\BusReservationService.Domain.csproj" />
-    <ProjectReference Include="..\..\..\Share\BusReservationService.Utils\BusReservationService.Utils.csproj" />
+    <ProjectReference Include="../../../Share/Utils/BusReservationService.Utils.csproj" />
   </ItemGroup>
 
 </Project>

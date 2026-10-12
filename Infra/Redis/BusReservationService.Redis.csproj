@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="../../Domain/BusReservationService.Domain.csproj" />
     <ProjectReference Include="../../Share/Utils/BusReservationService.Utils.csproj" />
-    <ProjectReference Include="../../Application/Server/BusReservationService/BusReservationService.csproj" />
   </ItemGroup>
 
   <ItemGroup>

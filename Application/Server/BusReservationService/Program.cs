@@ -1,3 +1,4 @@
+using BusReservationService.Endpoints;
 using BusReservationService.Database.Repository;
 using BusReservationService.Database.Service;
 using BusReservationService.Domain.Repository;
@@ -34,19 +35,7 @@ builder.Services.AddSingleton<ISessionService<Guid, ActivationSessionValue>, InM
 // Application Query Service
 builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
 
-builder.Services
-   .AddAuthenticationCookie(validFor: TimeSpan.FromMinutes(3), options: options =>
-   {
-       options.Cookie.Name = "__Host-BusReservationService.SessionId";
-
-   }) //configure cookie auth
-   .AddAuthorization(options =>
-   {
-       options.AddPolicy("VerifiedUser", x => x.RequireRole("User").RequireClaim("SessionId"));
-       options.AddPolicy("AdminOnly",x => x.RequireRole("Admin").RequireClaim("SessionId"));
-
-   }) //add this
-   .AddFastEndpoints();
+builder.Services.AddPresentationEndpoints(builder.Configuration);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
