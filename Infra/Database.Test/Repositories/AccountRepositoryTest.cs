@@ -130,8 +130,25 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
         account.Should().BeNull();
     }
 
-    public Task DisposeAsync()
+    
+    [Fact]
+    public async Task Delete_Account()
     {
-        return _postgres.DisposeAsync().AsTask();
-    }    
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var account = await accountRepository!.FindByEmail("test1@example.com");
+
+        var ret = await accountRepository.DeleteAsync(account!);
+        ret.Should().Equals(1);
+        
+        ret = await accountRepository.DeleteAsync(account!);
+        ret.Should().Equals(0);
+
+        account = await accountRepository!.FindByEmail("test1@example.com");
+        account.Should().BeNull();
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 };
