@@ -125,7 +125,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
         EnsureConnectionOpen(connection);
         using var tx = connection.BeginTransaction();
         var sql = """
-            DELETE accounts WHERE Id = @Id;
+            DELETE FROM accounts WHERE Id = @Id;
             """;
 
         var ret = await connection.ExecuteAsync(sql, account, tx);
