@@ -96,6 +96,18 @@ public class UserRepositoryTest : IAsyncLifetime
         account.Should().NotBeNull();
     }
 
+    
+    [Fact]
+    public async Task If_Not_Exist_Account_Then_FindByEmail_Should_NotBeNull()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var account = await accountRepository!.FindByEmail("not_exist_address@example.com");
+        account.Should().BeNull();
+    }
+
     public Task DisposeAsync()
     {
         return _postgres.DisposeAsync().AsTask();
