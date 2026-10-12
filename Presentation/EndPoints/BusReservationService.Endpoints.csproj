@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="FastEndpoints" Version="5.17.1" />
+    <PackageReference Include="FastEndpoints.Security" Version="3.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Application/Server/BusReservationService/BusReservationService.csproj" />
+    <ProjectReference Include="../../Domain/BusReservationService.Domain.csproj" />
+    <ProjectReference Include="../../Share/Utils/BusReservationService.Utils.csproj" />
   </ItemGroup>
 
 </Project>
