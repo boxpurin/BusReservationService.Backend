@@ -1,4 +1,5 @@
 using BusReservationService.Endpoints;
+using BusReservationService.Redis;
 using BusReservationService.Database.Repository;
 using BusReservationService.Database.Service;
 using BusReservationService.Domain.Repository;
@@ -27,8 +28,7 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Session Management Service
-builder.Services.AddSingleton<ISessionService<Guid, SessionValue>, InMemorySessionService>();
-builder.Services.AddSingleton<ISessionService<Guid, ActivationSessionValue>, InMemoryActivationSessionService>();
+builder.Services.AddServiceSessionStore(builder.Configuration);
 
 // Application Service
 

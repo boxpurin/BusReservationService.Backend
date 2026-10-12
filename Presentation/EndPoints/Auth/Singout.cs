@@ -3,11 +3,12 @@ using FastEndpoints;
 using FastEndpoints.Security;
 using BusReservationService.Services.Interface;
 using BusReservationService.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace BusReservationService.Endpoints.Auth;
 
 using ResponseType = Results<NoContent, BadRequest, InternalServerError>;
-public class Singout(ISessionService<Guid, SessionValue> SessionService) : Endpoint<SingoutRequest, ResponseType>
+public class Singout() : Endpoint<SingoutRequest, ResponseType>
 {    public override void Configure()
     {
         Verbs(Http.POST);
@@ -18,8 +19,6 @@ public class Singout(ISessionService<Guid, SessionValue> SessionService) : Endpo
     public override async Task<ResponseType> HandleAsync(SingoutRequest req,CancellationToken c)
     {
         await CookieAuth.SignOutAsync();
-
-        SessionService.ClearSession(req.SessionId);
         return TypedResults.NoContent();
     }
 }
@@ -27,6 +26,6 @@ public class Singout(ISessionService<Guid, SessionValue> SessionService) : Endpo
 public record SingoutRequest()
 {
     [FromClaim]
-    public Guid SessionId {get; set;}
+    public Guid AccountId {get; set;}
 }
 

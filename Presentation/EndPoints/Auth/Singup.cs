@@ -4,6 +4,7 @@ using BusReservationService.Models;
 using BusReservationService.Util;
 using FastEndpoints;
 using FastEndpoints.Security;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BusReservationService.Endpoints.Auth;
@@ -31,18 +32,15 @@ internal class Singup(IAccountRepository AccountRepository) : Endpoint<SingupReq
             return TypedResults.Conflict();
         }
         
-        // TODO
         // リクエストのパスワードのハッシュ化
-
         var (hash , salt) = Argon2Helper.HashPassword(req.Password);
         AccountEntity entity = AccountEntity.CreateUserRoleAccount(req.Email, hash , salt);
 
         var result = await AccountRepository.AddAsync(entity);
-        var sessionId = Guid.CreateVersion7().ToString();
 
         await CookieAuth.SignInAsync(u =>
         {
-            u.Claims.Add(new("SessionId", sessionId));
+            u["AccountId"] = result?.Id.ToString()!;
         });
 
         return TypedResults.Created(
