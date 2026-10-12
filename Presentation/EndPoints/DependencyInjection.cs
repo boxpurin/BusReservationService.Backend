@@ -1,5 +1,6 @@
 using FastEndpoints;
 using FastEndpoints.Security;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,5 +25,15 @@ public static class DependencyInjection
         .AddFastEndpoints();
 
         return services;
+    }
+
+    public static IApplicationBuilder UsePresentationEndpoints(this WebApplication app)
+    {
+        app.UseAuthentication()
+        .UseAuthorization()
+        .UseDefaultExceptionHandler()
+        .UseFastEndpoints();
+
+        return app;
     }
 }
