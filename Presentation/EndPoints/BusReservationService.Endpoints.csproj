@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FastEndpoints" Version="8.3.0" />
+    <PackageReference Include="FastEndpoints.Security" Version="8.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Application/Core/BusReservationService.Application.Core.csproj" />
+    <ProjectReference Include="../../Domain/BusReservationService.Domain.csproj" />
+    <ProjectReference Include="../../Share/Utils/BusReservationService.Utils.csproj" />
+  </ItemGroup>
+
+</Project>

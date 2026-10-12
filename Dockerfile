@@ -2,17 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY ["Server/BusReservationService/BusReservationService.csproj", "Server/BusReservationService/"]
-COPY ["Infra/Database/BusReservationService.Database.csproj", "Infra/Database/"]
-COPY ["BusReservationService.Domain/BusReservationService.Domain.csproj", "BusReservationService.Domain/"]
-COPY ["BusReservationService.Share/BusReservationService.Share.csproj", "BusReservationService.Share/"]
-
-RUN dotnet restore "Server/BusReservationService/BusReservationService.csproj"
-
 COPY . .
 
+RUN dotnet restore \
+    "Application/Server/BusReservationService/BusReservationService.csproj"
+
 RUN dotnet publish \
-    "Server/BusReservationService/BusReservationService.csproj" \
+    "Application/Server/BusReservationService/BusReservationService.csproj" \
     --configuration Release \
     --output /app/publish \
     --no-restore \

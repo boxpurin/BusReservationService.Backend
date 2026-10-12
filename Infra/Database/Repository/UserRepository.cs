@@ -18,9 +18,8 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
         const string sql = """
                 INSERT INTO users 
                 (account_id, first_name, last_name, zip_code, street_address, phone_number, fax_number, user_type)
-                VALUE(@Account.Id, @Firstname, @LastName, @ZipCode, @StreetAddress, @PhoneNumber, @FaxNumber, @UserType)
-                WHERE account_id = @Account.Id
-                RETURNING * FROM users;
+                VALUES (@AccountId, @Firstname, @LastName, @ZipCode, @StreetAddress, @PhoneNumber, @FaxNumber, @UserType)
+                RETURNING *;
             """;
 
         var userTable = await connection.QueryFirstAsync<UserTable>(sql, dto, tx);        
@@ -68,7 +67,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 
     public async Task<UserEntity?> FindByAccountId(Guid accountId)
     {
-        var accountTable = await connection.QueryFirstAsync<AccountTable>("""
+        var accountTable = await connection.QueryFirstOrDefaultAsync<AccountTable>("""
         SELECT * FROM accounts WHERE Id = @AccountId ;
         """,
         new { AccountId = accountId });
@@ -80,7 +79,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
-        var userTable = await connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
+        var userTable = await connection.QueryFirstOrDefaultAsync<UserTable>(sql, new { AccountId = accountId });
 
         if ( userTable is null )
         {
@@ -102,7 +101,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
     {
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
-        var ret = await connection.QueryFirstAsync<UserTable>(sql, new { AccountId = accountId });
+        var ret = await connection.QueryFirstOrDefaultAsync<UserTable>(sql, new { AccountId = accountId });
 
         return ret is not null;
     }

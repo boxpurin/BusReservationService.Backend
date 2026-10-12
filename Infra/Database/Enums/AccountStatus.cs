@@ -4,11 +4,11 @@ namespace BusReservationService.Database.Enums;
 
 internal enum AccountStatus
 {
-    JustCreated,
-    PendingEmailVerify,
-    OnBoarding,
-    Active,
-    Suspended,
+    JustCreated = 0,
+    PendingEmailVerify = 1,
+    OnBoarding = 2,
+    Activated = 3,
+    Suspended = 4,
 }
 
 internal static class AccountStatusExtensions
