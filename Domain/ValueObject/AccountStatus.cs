@@ -5,7 +5,7 @@ public enum AccountStatus
     JustCreated = 0,
     PendingEmailVerify = 1,
     OnBoarding = 2,
-    Active = 3,
+    Activated = 3,
     Suspended = 4,
 }
 
@@ -17,12 +17,12 @@ public static class AccountStatusExteinsion
 
     public static bool IsOnBoarding(this AccountStatus status) => status is AccountStatus.OnBoarding;
 
-    public static bool IsActivated(this AccountStatus status) => status is AccountStatus.Active;
+    public static bool IsActivated(this AccountStatus status) => status is AccountStatus.Activated;
 
     public static bool IsSuspend(this AccountStatus status) => status is AccountStatus.Suspended;
 
     public static void WaitVerifing(this AccountStatus status) => status = AccountStatus.PendingEmailVerify;
 
     public static void Verified(this AccountStatus status) => status = AccountStatus.OnBoarding;
-    public static void Activate(this AccountStatus status) => status = AccountStatus.Active;
+    public static void Activate(this AccountStatus status) => status = AccountStatus.Activated;
 }
