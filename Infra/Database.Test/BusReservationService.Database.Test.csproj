@@ -28,6 +28,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- SqlScriptsフォルダ内のすべての.sqlファイルを対象にする -->
+    <None Update="Sql\Seeds\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Database\Migrations\**\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Migrations\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 
