@@ -16,7 +16,6 @@ using FastEndpoints;
 /// <param name="AccountRepository">アカウント情報のリポジトリ</param>
 /// <param name="UserRepository">ユーザー情報のリポジトリ</param>
 public class Activate(
-    ISessionService<Guid, SessionValue> SessionService, 
     IAccountRepository AccountRepository,
     IUserRepository UserRepository) : Endpoint<ActivateRequest>
 {
@@ -30,16 +29,9 @@ public class Activate(
 
     public override async Task HandleAsync(ActivateRequest req, CancellationToken c)
     {
-        // セッション情報の習得
-        var session = SessionService[req.SessionId];
-        if (session is null)
-        {
-            await Send.ErrorsAsync(401);
-            return;
-        }
 
         // アカウント情報を習得
-        var account = await AccountRepository.FindByAccountId(session.AccountId);
+        var account = await AccountRepository.FindByAccountId(req.AccountId);
         if (account is null)
         {
             AddError("アカウント情報が存在しません。");
@@ -48,7 +40,7 @@ public class Activate(
         }
 
         // すでにユーザー情報が追加されているアカウントIDなのかを確認する
-        if (await UserRepository.ExistByAccountId(session.AccountId))
+        if (await UserRepository.ExistByAccountId(req.AccountId))
         {
             AddError("このアカウントにはユーザー情報がすでに登録されています。");
             await Send.ErrorsAsync(415);
@@ -56,11 +48,11 @@ public class Activate(
         }
 
         var entity = UserEntity.CreateUserEntity(
-            session.AccountId, 
+            req.AccountId, 
             req.FirstName, 
             req.LastName,
             req.ZipCode,
-            req.StreetAdress,
+            req.StreetAddress,
             req.PhoneNumber,
             req.FaxNumber,
             req.UserType
@@ -68,11 +60,11 @@ public class Activate(
 
         // ユーザーの登録
         var user = await UserRepository.AddAsymc(new AddAsymcDto(
-            session.AccountId, 
+            req.AccountId, 
             req.FirstName, 
             req.LastName,
             req.ZipCode,
-            req.StreetAdress,
+            req.StreetAddress,
             req.PhoneNumber,
             req.FaxNumber,
             req.UserType
@@ -83,10 +75,6 @@ public class Activate(
         // アカウント情報の更新
         account = await AccountRepository.UpdateAsync(account);
 
-        // セッションの更新
-        var sessionValue = new SessionValue(account, user);
-        SessionService[req.SessionId] = sessionValue;
-
         await Send.CreatedAtAsync("/auth/activate");
     }
 }
@@ -95,11 +83,11 @@ public record ActivateRequest(
     string FirstName, 
     string LastName, 
     string ZipCode,
-    string StreetAdress,
+    string StreetAddress,
     string PhoneNumber, 
     string? FaxNumber,
     UserType UserType)
 {
     [FromClaim]
-    public Guid SessionId {get; set;}
+    public Guid AccountId {get; set;}
 }
