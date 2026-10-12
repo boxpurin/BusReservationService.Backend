@@ -18,7 +18,7 @@ public record AddAsymcDto(
     string FirstName,
     string LastName,
     string ZipCode,
-    string StreetAdress,
+    string StreetAddress,
     string PhoneNumber,
     string? FaxNumber,
     UserType UserType
