@@ -1,49 +1,32 @@
-using Xunit;
 using FluentAssertions;
-using Testcontainers.Xunit;
-using Testcontainers.PostgreSql;
-using Xunit.Abstractions;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Database.Repository;
 using System.Data;
 using BusReservationService.Domain.Entity;
-using DotNet.Testcontainers.Configurations;
 using BusReservationService.Database.Service;
+using Dapper;
 using Microsoft.Extensions.Configuration;
+using BusReservationService.Database.Test.Utils;
+using Respawn;
 
 
 namespace BusReservationService.Database.Test.Repositories;
 
-public class UserRepositoryTest : IAsyncLifetime
+public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgres = 
-    new PostgreSqlBuilder("postgres:16-alpine")
-    .WithDatabase("test_db")
-    .WithUsername("postgres")
-    .WithPassword("password")
-    .WithBindMount(
-        Path.GetFullPath("Migrations/20260911084734_init.sql"), 
-        "/docker-entrypoint-initdb.d/01_init.sql", 
-        AccessMode.ReadOnly)
-    .WithBindMount(
-        Path.GetFullPath("Sql/Seeds/001_accounts.sql"), 
-        "/docker-entrypoint-initdb.d/02_accounts.sql", 
-        AccessMode.ReadOnly)
-    .Build();
-
+    private readonly DatabaseFixture _fixture;
     private DatabaseService? dbService = null;
+    private Respawner? _respawner = null;
 
-
+    public UserRepositoryTest(DatabaseFixture fixture)
+    {
+        _fixture = fixture;
+    }
     public async Task InitializeAsync()
     {        
-        await _postgres.StartAsync(); 
-        // 2. Get the dynamic connection string
-        string connectionString = _postgres.GetConnectionString();
-
-        // 3. Build IConfiguration with the container's connection string
         var inMemorySettings = new Dictionary<string, string?>
         {
-            ["ConnectionStrings:DefaultConnection"] = connectionString
+            ["ConnectionStrings:DefaultConnection"] = _fixture.ConnectionString
         };
 
         IConfiguration _configuration = new ConfigurationBuilder()
@@ -52,6 +35,27 @@ public class UserRepositoryTest : IAsyncLifetime
             
         dbService = new DatabaseService(_configuration);
         dbService.ConfigureMappings();
+        
+        using var conn = dbService.CreateConnection();
+        conn.Open();
+
+        // 初回のみRespawnerを初期化
+        if (_respawner == null)
+        {
+            _respawner = await Respawner.CreateAsync(
+                (System.Data.Common.DbConnection)conn, 
+                new RespawnerOptions{
+                    DbAdapter = DbAdapter.Postgres,
+            });
+        }
+
+        // 1. 全テーブルのデータを空にする
+        await _respawner.ResetAsync((System.Data.Common.DbConnection)conn);
+
+        // 2. テストが始まる前に、SeedデータをDapperで直接流し込んで復元する
+        var seedSqlPath = Path.GetFullPath("Sql/Seeds/001_accounts.sql");
+        var seedSql = await File.ReadAllTextAsync(seedSqlPath);
+        await conn.ExecuteAsync(seedSql);
     }
 
     // IDbConnection を生成して返すファクトリメソッド
