@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastEndpoints" Version="5.17.1" />
-    <PackageReference Include="FastEndpoints.Security" Version="3.7.0" />
+    <PackageReference Include="FastEndpoints" Version="8.3.0" />
+    <PackageReference Include="FastEndpoints.Security" Version="8.3.0" />
   </ItemGroup>
 
   <ItemGroup>
