@@ -7,7 +7,7 @@ internal enum AccountStatus
     JustCreated,
     PendingEmailVerify,
     OnBoarding,
-    Active,
+    Activated,
     Suspended,
 }
 

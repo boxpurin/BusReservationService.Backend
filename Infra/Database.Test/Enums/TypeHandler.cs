@@ -21,7 +21,7 @@ public class TypeHandler_UnitTest
     [InlineData("just_created", AccountStatus.JustCreated)]
     [InlineData("pending_email_verify", AccountStatus.PendingEmailVerify)]
     [InlineData("on_boarding", AccountStatus.OnBoarding)]
-    [InlineData("active", AccountStatus.Active)]
+    [InlineData("activated", AccountStatus.Activated)]
     [InlineData("suspended", AccountStatus.Suspended)]
     internal void Parse_ShouldBeFromSnakeCase_WithTypeHandler(string val, AccountStatus expected)
     {
@@ -33,7 +33,7 @@ public class TypeHandler_UnitTest
     [InlineData("just_created", AccountStatus.JustCreated)]
     [InlineData("pending_email_verify", AccountStatus.PendingEmailVerify)]
     [InlineData("on_boarding", AccountStatus.OnBoarding)]
-    [InlineData("active", AccountStatus.Active)]
+    [InlineData("activated", AccountStatus.Activated)]
     [InlineData("suspended", AccountStatus.Suspended)]
     internal void SetValue_ShouldConvertValueAndType_WithoutMock(string expected, AccountStatus val)
     {
