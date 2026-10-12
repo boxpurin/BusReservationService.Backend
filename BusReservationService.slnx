@@ -1,9 +1,4 @@
 <Solution>
-
-  <Folder Name="/Presentation/">
-
-  </Folder>
-
   <Folder Name="/Infra/">
     <Project Path="Infra/Database.Test/BusReservationService.Database.Test.csproj" />
     <Project Path="Infra/Database/BusReservationService.Database.csproj" Id="1b9c9352-4be8-415d-9e4a-fd95d922cc9d" />
@@ -13,6 +8,10 @@
 
   <Folder Name="/Application/">
     <Project Path="Application/Server/BusReservationService/BusReservationService.csproj" />
+  </Folder>
+
+  <Folder Name="/Presentation/EndPoints/">
+    <Project Path="Presentation/EndPoints/BusReservationService.Endpoints.csproj" />
   </Folder>
 
   <Folder Name="/Share/">
