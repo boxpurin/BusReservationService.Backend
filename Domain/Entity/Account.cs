@@ -41,7 +41,7 @@ public class AccountEntity
 
     public void Activate()
     {
-        AccountStatus = AccountStatus.Active;
+        AccountStatus = AccountStatus.Activated;
         ActivatedAt = DateTime.UtcNow;
     }
 

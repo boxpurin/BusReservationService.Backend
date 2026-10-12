@@ -42,8 +42,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 password_hash = @PasswordHash,
                 password_salt = @PasswordSalt, 
                 account_status = @AccountStatus ,
-                account_role = @AccountRole , 
-                lastLoginAt = @LastLoginAt 
+                account_role = @AccountRole
                 WHERE id = @Id
                 RETURNING *;
             """;
