@@ -64,8 +64,11 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
         return dbService!.CreateConnection();
     }
 
-    [Fact]
-    public async Task AddAsync_Test()
+    [Theory]
+    [InlineData("password", "salt")]
+    [InlineData("password1234", "salt")]
+    [InlineData("1234password", "salt")]
+    public async Task AddAsync_Test(string password, string salt)
     {
         IAccountRepository accountRepository = new AccountRepository(
             CreateConnection()
@@ -73,8 +76,8 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
 
         var account = AccountEntity.CreateUserRoleAccount(
             "test@email.com", 
-            System.Text.Encoding.UTF8.GetBytes("password"),
-            System.Text.Encoding.UTF8.GetBytes("salt")
+            System.Text.Encoding.UTF8.GetBytes(password),
+            System.Text.Encoding.UTF8.GetBytes(salt)
         );
     
         var result = await accountRepository.AddAsync(account);
