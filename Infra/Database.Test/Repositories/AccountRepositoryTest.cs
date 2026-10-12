@@ -90,6 +90,21 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
     }
 
     [Fact]
+    public async Task Update_Async_Test()
+    {        
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var account = await accountRepository.FindByEmail("test1@example.com");
+        
+        account!.Activate();
+        account = await accountRepository.UpdateAsync(account);
+
+        account.Should().NotBeNull();
+    }
+
+    [Fact]
     public async Task If_Exist_Account_Then_FindByEmail_Should_NotBeNull()
     {
         IAccountRepository accountRepository = new AccountRepository(
