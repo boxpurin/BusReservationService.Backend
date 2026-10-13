@@ -129,8 +129,33 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         var account = await accountRepository!.FindByEmailAsync("not_exist_address@example.com");
         account.Should().BeNull();
     }
-
     
+    [Fact]
+    public async Task If_Exist_Account_Then_FindByAccountId_Should_NotBeNull()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
+        account.Should().NotBeNull();
+        
+        account = await accountRepository!.FindByAccountIdAsync(account!.Id);
+        account.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task If_Not_Exist_Account_Then_FindByAccountId_Should_NotBeNull()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        // AccountIdはGUID v7
+        var account = await accountRepository!.FindByAccountIdAsync(Guid.NewGuid());
+        account.Should().BeNull();
+    }
+
     [Fact]
     public async Task Delete_Account()
     {
