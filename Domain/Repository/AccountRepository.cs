@@ -15,6 +15,5 @@ public interface IAccountRepository
     Task<bool> IsExistByAccountId(Guid accountId);
     Task<bool> IsExistByEmail(string email);
 
-    Task<bool> DeleteListAsync(AccountEntity[] account);
     Task<bool> DeleteAsync(AccountEntity account);
 }

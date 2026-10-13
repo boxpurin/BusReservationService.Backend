@@ -114,12 +114,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
         return ret is not null;
     }
-
-    public async Task<bool> DeleteListAsync(AccountEntity[] account)
-    {
-        EnsureConnectionOpen(connection);
-        throw new NotImplementedException();
-    }
+    
     public async Task<bool> DeleteAsync(AccountEntity account)
     {
         EnsureConnectionOpen(connection);
