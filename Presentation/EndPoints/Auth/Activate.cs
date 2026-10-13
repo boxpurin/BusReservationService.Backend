@@ -31,7 +31,7 @@ public class Activate(
     {
 
         // アカウント情報を習得
-        var account = await AccountRepository.FindByAccountId(req.AccountId);
+        var account = await AccountRepository.FindByAccountIdAsync(req.AccountId);
         if (account is null)
         {
             AddError("アカウント情報が存在しません。");
@@ -40,7 +40,7 @@ public class Activate(
         }
 
         // すでにユーザー情報が追加されているアカウントIDなのかを確認する
-        if (await UserRepository.ExistByAccountId(req.AccountId))
+        if (await UserRepository.ExistByAccountIdAsync(req.AccountId))
         {
             AddError("このアカウントにはユーザー情報がすでに登録されています。");
             await Send.ErrorsAsync(415);

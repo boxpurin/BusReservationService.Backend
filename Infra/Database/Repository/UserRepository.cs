@@ -65,7 +65,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
             userTable.UserType.ToDomain());
     }
 
-    public async Task<UserEntity?> FindByAccountId(Guid accountId)
+    public async Task<UserEntity?> FindByAccountIdAsync(Guid accountId)
     {
         var accountTable = await connection.QueryFirstOrDefaultAsync<AccountTable>("""
         SELECT * FROM accounts WHERE Id = @AccountId ;
@@ -97,7 +97,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
             userTable.FaxNumber,
             userTable.UserType.ToDomain());
     }
-    public async Task<bool> ExistByAccountId(Guid accountId)
+    public async Task<bool> ExistByAccountIdAsync(Guid accountId)
     {
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
@@ -107,7 +107,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
     }
 
 
-    public async Task<bool> DeleteById(Guid accountId)
+    public async Task<bool> DeleteByAccountIdAsync(Guid accountId)
     {
         using var tx = connection.BeginTransaction();
         await connection.ExecuteAsync("DELETE users WHERE account_id = @AccountId", new { AccountId = accountId });

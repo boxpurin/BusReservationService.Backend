@@ -99,7 +99,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
             CreateConnection()
         );
 
-        var account = await accountRepository.FindByEmail("test1@example.com");
+        var account = await accountRepository.FindByEmailAsync("test1@example.com");
         
         account!.Activate();
         account = await accountRepository.UpdateAsync(account);
@@ -114,7 +114,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
             CreateConnection()
         );
 
-        var account = await accountRepository!.FindByEmail("test1@example.com");
+        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
         account.Should().NotBeNull();
     }
 
@@ -126,7 +126,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
             CreateConnection()
         );
 
-        var account = await accountRepository!.FindByEmail("not_exist_address@example.com");
+        var account = await accountRepository!.FindByEmailAsync("not_exist_address@example.com");
         account.Should().BeNull();
     }
 
@@ -138,7 +138,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
             CreateConnection()
         );
 
-        var account = await accountRepository!.FindByEmail("test1@example.com");
+        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
 
         var ret = await accountRepository.DeleteAsync(account!);
         ret.Should().Equals(1);
@@ -146,7 +146,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
         ret = await accountRepository.DeleteAsync(account!);
         ret.Should().Equals(0);
 
-        account = await accountRepository!.FindByEmail("test1@example.com");
+        account = await accountRepository!.FindByEmailAsync("test1@example.com");
         account.Should().BeNull();
     }
 
