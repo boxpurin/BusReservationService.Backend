@@ -12,7 +12,7 @@ using Respawn;
 
 namespace BusReservationService.Database.Test.Repositories;
 
-public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
+public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
 {
     private readonly DatabaseFixture _fixture;
     private DatabaseService? dbService = null;
