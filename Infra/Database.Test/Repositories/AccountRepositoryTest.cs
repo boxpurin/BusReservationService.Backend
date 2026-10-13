@@ -157,6 +157,55 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     }
 
     [Fact]
+    public async Task If_Exist_Account_Then_ExistByEmail_Should_True()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var ret = await accountRepository!.IsExistByEmailAsync("test1@example.com");
+        ret.Should().Be(true);
+    }
+
+    
+    [Fact]
+    public async Task If_Not_Exist_Account_Then_ExistByEmail_Should_True()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var ret = await accountRepository!.IsExistByEmailAsync("not_exist_address@example.com");
+        ret.Should().Be(false);
+    }
+    
+    [Fact]
+    public async Task If_Exist_Account_Then_ExistByAccountId_Should_True()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
+        account.Should().NotBeNull();
+        
+        var ret = await accountRepository!.IsExistByAccountIdAsync(account!.Id);
+        ret.Should().Be(true);
+    }
+
+    
+    [Fact]
+    public async Task If_Not_Exist_Account_Then_ExistByAccountId_Should_False()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+        
+        var ret = await accountRepository!.IsExistByAccountIdAsync(Guid.NewGuid());
+        ret.Should().Be(false);
+    }
+
+    [Fact]
     public async Task Delete_Account()
     {
         IAccountRepository accountRepository = new AccountRepository(
