@@ -136,11 +136,11 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         IAccountRepository accountRepository = new AccountRepository(
             CreateConnection()
         );
-
-        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
-        account.Should().NotBeNull();
         
-        account = await accountRepository!.FindByAccountIdAsync(account!.Id);
+        var account = await accountRepository!.FindByAccountIdAsync(
+            TestAccountIds.IDList.First()
+        );
+
         account.Should().NotBeNull();
     }
 
@@ -152,7 +152,9 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
 
         // AccountIdはGUID v7
-        var account = await accountRepository!.FindByAccountIdAsync(Guid.NewGuid());
+        var account = await accountRepository!.FindByAccountIdAsync(
+            TestAccountIds.NotExistId
+        );
         account.Should().BeNull();
     }
 
@@ -185,11 +187,8 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         IAccountRepository accountRepository = new AccountRepository(
             CreateConnection()
         );
-
-        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
-        account.Should().NotBeNull();
         
-        var ret = await accountRepository!.IsExistByAccountIdAsync(account!.Id);
+        var ret = await accountRepository!.IsExistByAccountIdAsync(TestAccountIds.IDList.First());
         ret.Should().Be(true);
     }
 
@@ -201,7 +200,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
             CreateConnection()
         );
         
-        var ret = await accountRepository!.IsExistByAccountIdAsync(Guid.NewGuid());
+        var ret = await accountRepository!.IsExistByAccountIdAsync(TestAccountIds.NotExistId);
         ret.Should().Be(false);
     }
 
@@ -212,7 +211,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
             CreateConnection()
         );
 
-        var account = await accountRepository!.FindByEmailAsync("test1@example.com");
+        var account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());
 
         var ret = await accountRepository.DeleteAsync(account!);
         ret.Should().Equals(1);
@@ -220,7 +219,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         ret = await accountRepository.DeleteAsync(account!);
         ret.Should().Equals(0);
 
-        account = await accountRepository!.FindByEmailAsync("test1@example.com");
+        account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());
         account.Should().BeNull();
     }
 
