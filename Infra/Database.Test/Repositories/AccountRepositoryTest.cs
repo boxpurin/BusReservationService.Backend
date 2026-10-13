@@ -18,7 +18,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
     private DatabaseService? dbService = null;
     private Respawner? _respawner = null;
 
-    public UserRepositoryTest(DatabaseFixture fixture)
+    public AccountRepositoryTest(DatabaseFixture fixture)
     {
         _fixture = fixture;
     }
