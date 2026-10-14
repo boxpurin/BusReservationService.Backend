@@ -83,11 +83,11 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         var result = await accountRepository.AddAsync(account);
 
         result.Id.Should().NotBeEmpty();
-        result.Email.Should().Equals(account.Email);
+        result.Email.Should().Be(account.Email);
         result.PasswordHash.Should().Equal(account.PasswordHash);
         result.PasswordSalt.Should().Equal(account.PasswordSalt);
-        result.AccountStatus.Should().Equals(account.AccountStatus);
-        result.AccountRole.Should().Equals(account.AccountRole);
+        result.AccountStatus.Should().Be(account.AccountStatus);
+        result.AccountRole.Should().Be(account.AccountRole);
         result.ActivatedAt.Should().BeNull();
         result.LastLoginAt.Should().BeNull();
     }
@@ -213,11 +213,11 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
 
         var account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());
 
-        var ret = await accountRepository.DeleteAsync(account!);
-        ret.Should().Equals(1);
+        bool deleted = await accountRepository.DeleteAsync(account!);
+        deleted.Should().Be(true);
         
-        ret = await accountRepository.DeleteAsync(account!);
-        ret.Should().Equals(0);
+        deleted = await accountRepository.DeleteAsync(account!);
+        deleted.Should().Be(false);
 
         account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());
         account.Should().BeNull();
