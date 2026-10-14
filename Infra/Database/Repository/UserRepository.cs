@@ -14,6 +14,8 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 {
     public async Task<UserEntity> AddAsymc(AddAsymcDto dto)
     {
+        EnsureConnectionOpen(connection);
+
         using var tx = connection.BeginTransaction();
         const string sql = """
                 INSERT INTO users 
@@ -39,44 +41,33 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 
     public async Task<UserEntity> UpdateAsync(UserEntity entity)
     {
+        EnsureConnectionOpen(connection);
+
         using var tx = connection.BeginTransaction();
         const string sql = """
                 UPDATE users
-                SET account_id = @AccountId ,
+                SET 
+                account_id = @AccountId ,
                 first_name = @FirstName ,
                 last_name = @LastName ,
+                zip_code = @ZipCode ,
+                street_address = @StreetAddress ,
                 phone_number = @PhoneNumber ,
+                fax_number = @FaxNumber ,
                 user_type = @UserType 
-                WHERE account_id = @AccountId            
+                WHERE account_id = @AccountId 
+                RETURNING * ;
             """;
 
         var userTable = await connection.QueryFirstAsync<UserTable>(sql, entity);
         tx.Commit();
 
-        return UserEntity.
-            CreateUserEntity(
-            userTable.AccountId,
-            userTable.FirstName,
-            userTable.LastName,
-            userTable.ZipCode,
-            userTable.StreetAddress,
-            userTable.PhoneNumber,
-            userTable.FaxNumber,
-            userTable.UserType.ToDomain());
+        return userTable.ToDomain();
     }
 
     public async Task<UserEntity?> FindByAccountIdAsync(Guid accountId)
     {
-        var accountTable = await connection.QueryFirstOrDefaultAsync<AccountTable>("""
-        SELECT * FROM accounts WHERE Id = @AccountId ;
-        """,
-        new { AccountId = accountId });
-
-        if(accountTable is null)
-        {
-            return null;
-        }
-
+        EnsureConnectionOpen(connection);
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
         var userTable = await connection.QueryFirstOrDefaultAsync<UserTable>(sql, new { AccountId = accountId });
@@ -99,6 +90,8 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
     }
     public async Task<bool> ExistByAccountIdAsync(Guid accountId)
     {
+        EnsureConnectionOpen(connection);
+
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
         var ret = await connection.QueryFirstOrDefaultAsync<UserTable>(sql, new { AccountId = accountId });
@@ -109,11 +102,13 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 
     public async Task<bool> DeleteByAccountIdAsync(Guid accountId)
     {
+        EnsureConnectionOpen(connection);
+        
         using var tx = connection.BeginTransaction();
-        await connection.ExecuteAsync("DELETE users WHERE account_id = @AccountId", new { AccountId = accountId });
+        var ret = await connection.ExecuteAsync("DELETE FROM users WHERE account_id = @AccountId", new { AccountId = accountId });
 
         tx.Commit();
 
-        return true;
+        return ret == 1;
     }
 }
