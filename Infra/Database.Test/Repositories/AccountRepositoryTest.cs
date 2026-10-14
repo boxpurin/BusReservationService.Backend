@@ -108,6 +108,18 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     }
 
     [Fact]
+    public async Task GetAllAsync_Test()
+    {
+        IAccountRepository accountRepository = new AccountRepository(
+            CreateConnection()
+        );
+
+        var accounts = await accountRepository.GetAllAsync();
+
+        accounts.Length.Should().Be(TestAccountIds.IDList.Length);
+    }
+
+    [Fact]
     public async Task If_Exist_Account_Then_FindByEmail_Should_NotBeNull()
     {
         IAccountRepository accountRepository = new AccountRepository(
