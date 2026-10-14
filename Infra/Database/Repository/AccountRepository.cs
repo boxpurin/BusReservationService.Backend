@@ -67,7 +67,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
         return ret.Select(t => t.ToDomain()).ToArray();
     }
 
-    public async Task<AccountEntity?> FindByAccountId(Guid accountId)
+    public async Task<AccountEntity?> FindByAccountIdAsync(Guid accountId)
     {
         EnsureConnectionOpen(connection);
         var sql = """
@@ -78,7 +78,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
         return ret?.ToDomain();
     }
-    public async Task<AccountEntity?> FindByEmail(string email)
+    public async Task<AccountEntity?> FindByEmailAsync(string email)
     {
         EnsureConnectionOpen(connection);
         var sql = """
@@ -90,7 +90,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
         return ret?.ToDomain();
     }
 
-    public async Task<bool> IsExistByAccountId(Guid accountId)
+    public async Task<bool> IsExistByAccountIdAsync(Guid accountId)
     {
         EnsureConnectionOpen(connection);
         var sql = """
@@ -103,7 +103,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
     }
 
-    public async Task<bool> IsExistByEmail(string email)
+    public async Task<bool> IsExistByEmailAsync(string email)
     {
         EnsureConnectionOpen(connection);
         var sql = """
@@ -114,18 +114,13 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
         return ret is not null;
     }
-
-    public async Task<bool> DeleteListAsync(AccountEntity[] account)
-    {
-        EnsureConnectionOpen(connection);
-        throw new NotImplementedException();
-    }
+    
     public async Task<bool> DeleteAsync(AccountEntity account)
     {
         EnsureConnectionOpen(connection);
         using var tx = connection.BeginTransaction();
         var sql = """
-            DELETE accounts WHERE Id = @Id;
+            DELETE FROM accounts WHERE Id = @Id;
             """;
 
         var ret = await connection.ExecuteAsync(sql, account, tx);

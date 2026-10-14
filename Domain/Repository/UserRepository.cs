@@ -8,9 +8,9 @@ public interface IUserRepository
 {
     Task<UserEntity> AddAsymc(AddAsymcDto dto);
     Task<UserEntity> UpdateAsync(UserEntity entity);
-    Task<UserEntity?> FindByAccountId(Guid accountId);
-    Task<bool> ExistByAccountId(Guid accountId);
-    Task<bool> DeleteById(Guid accountId);
+    Task<UserEntity?> FindByAccountIdAsync(Guid accountId);
+    Task<bool> ExistByAccountIdAsync(Guid accountId);
+    Task<bool> DeleteByAccountIdAsync(Guid accountId);
 }
 
 public record AddAsymcDto(

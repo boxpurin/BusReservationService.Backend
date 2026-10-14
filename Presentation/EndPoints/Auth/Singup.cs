@@ -26,7 +26,7 @@ internal class Singup(IAccountRepository AccountRepository) : Endpoint<SingupReq
     
     public override async Task<ResponseType> HandleAsync(SingupRequest req, CancellationToken c)
     {
-        var account = await AccountRepository.FindByEmail(req.Email);
+        var account = await AccountRepository.FindByEmailAsync(req.Email);
         if (account is not null)
         {
             return TypedResults.Conflict();
