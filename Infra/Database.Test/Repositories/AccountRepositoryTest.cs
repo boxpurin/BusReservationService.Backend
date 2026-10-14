@@ -53,7 +53,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         await _respawner.ResetAsync((System.Data.Common.DbConnection)conn);
 
         // 2. テストが始まる前に、SeedデータをDapperで直接流し込んで復元する
-        var seedSqlPath = Path.GetFullPath("Sql/Seeds/001_accounts.sql");
+        var seedSqlPath = Path.GetFullPath("Sql/Seeds/001_seeds.sql");
         var seedSql = await File.ReadAllTextAsync(seedSqlPath);
         await conn.ExecuteAsync(seedSql);
     }

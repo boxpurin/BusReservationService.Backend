@@ -15,8 +15,8 @@ public class DatabaseFixture : IAsyncLifetime
         "/docker-entrypoint-initdb.d/01_init.sql", 
         AccessMode.ReadOnly)
     .WithBindMount(
-        Path.GetFullPath("Sql/Seeds/001_accounts.sql"), 
-        "/docker-entrypoint-initdb.d/02_accounts.sql", 
+        Path.GetFullPath("Sql/Seeds/001_seeds.sql"), 
+        "/docker-entrypoint-initdb.d/02_seeds.sql", 
         AccessMode.ReadOnly)
     .Build();
 

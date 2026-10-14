@@ -11,3 +11,10 @@ VALUES
 ('00000000-0000-0000-0000-000000000008', 'test8@example.com', '\x01020304', '\x04030201', 'activated', 'lot_admin') ,
 ('00000000-0000-0000-0000-000000000009', 'test9@example.com', '\x01020304', '\x04030201', 'activated', 'admin') ,
 ('00000000-0000-0000-0000-000000000010', 'test0@example.com', '\x01020304', '\x04030201', 'activated', 'admin') ;
+
+INSERT INTO "public"."users"
+(account_id, first_name, last_name, zip_code, street_address, phone_number, fax_number, user_type)
+VALUES
+('00000000-0000-0000-0000-000000000001',
+'FirstName','LastName','1234567','東京都千代田区1-1-1',
+'090-0000-0000','06-0000-0000', 'personal') ;
