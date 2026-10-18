@@ -69,4 +69,33 @@ public class ParkingLotEntity
             isActive
         );
     }
+
+    
+    public static ParkingLotEntity FromSnapshot(
+        Guid parkingLotId,
+        string parkingLotName,
+        string zipCode,
+        Prefecture prefecture,
+        string streetAddress,
+        string phoneNumber,
+        string? faxNumber,
+        short maxCapacity,
+        short reservationCapacity,
+        bool isAllowsBoardingAlighting = false,
+        bool isActive = false)
+    {
+        return new ParkingLotEntity(
+            parkingLotId,
+            parkingLotName,
+            zipCode,
+            prefecture,
+            streetAddress,
+            phoneNumber,
+            faxNumber,
+            maxCapacity,
+            reservationCapacity,
+            isAllowsBoardingAlighting,
+            isActive
+        );
+    }
 }

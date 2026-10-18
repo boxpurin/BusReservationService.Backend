@@ -46,22 +46,30 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
                 (System.Data.Common.DbConnection)conn, 
                 new RespawnerOptions{
                     DbAdapter = DbAdapter.Postgres,
+                    TablesToIgnore = new Respawn.Graph.Table[] { "prefectures" }
             });
         }
 
         // 1. 全テーブルのデータを空にする
         await _respawner.ResetAsync((System.Data.Common.DbConnection)conn);
-
-        // 2. テストが始まる前に、SeedデータをDapperで直接流し込んで復元する
-        var seedSqlPath = Path.GetFullPath("Sql/Seeds/001_seeds.sql");
-        var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-        await conn.ExecuteAsync(seedSql);
     }
 
     // IDbConnection を生成して返すファクトリメソッド
-    public IDbConnection CreateConnection()
+    public async Task<IDbConnection> CreateConnectionAsync(string[]? seedSqlPaths = null)
     {
-        return dbService!.CreateConnection();
+        var conn = dbService!.CreateConnection();
+
+        if (seedSqlPaths is not null)
+        {
+            foreach(var path in seedSqlPaths)
+            {
+                var seedSqlPath = Path.GetFullPath(path);
+                var seedSql = await File.ReadAllTextAsync(seedSqlPath);
+                await conn.ExecuteAsync(seedSql);            
+            }
+        }
+
+        return conn;
     }
 
     [Theory]
@@ -71,7 +79,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task AddAsync_Test(string password, string salt)
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync()
         );
 
         var account = AccountEntity.CreateUserRoleAccount(
@@ -96,7 +104,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task Update_Async_Test()
     {        
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var account = await accountRepository.FindByEmailAsync("test1@example.com");
@@ -111,7 +119,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task GetAllAsync_Test()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var accounts = await accountRepository.GetAllAsync();
@@ -123,7 +131,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Exist_Account_Then_FindByEmail_Should_NotBeNull()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var account = await accountRepository!.FindByEmailAsync("test1@example.com");
@@ -135,7 +143,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Not_Exist_Account_Then_FindByEmail_Should_NotBeNull()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var account = await accountRepository!.FindByEmailAsync("not_exist_address@example.com");
@@ -146,7 +154,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Exist_Account_Then_FindByAccountId_Should_NotBeNull()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
         
         var account = await accountRepository!.FindByAccountIdAsync(
@@ -160,7 +168,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Not_Exist_Account_Then_FindByAccountId_Should_NotBeNull()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         // AccountIdはGUID v7
@@ -174,7 +182,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Exist_Account_Then_ExistByEmail_Should_True()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var ret = await accountRepository!.IsExistByEmailAsync("test1@example.com");
@@ -186,7 +194,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Not_Exist_Account_Then_ExistByEmail_Should_True()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var ret = await accountRepository!.IsExistByEmailAsync("not_exist_address@example.com");
@@ -197,7 +205,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Exist_Account_Then_ExistByAccountId_Should_True()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
         
         var ret = await accountRepository!.IsExistByAccountIdAsync(TestAccountIds.IDList.First());
@@ -209,7 +217,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task If_Not_Exist_Account_Then_ExistByAccountId_Should_False()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
         
         var ret = await accountRepository!.IsExistByAccountIdAsync(TestAccountIds.NotExistId);
@@ -220,7 +228,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     public async Task Delete_Account()
     {
         IAccountRepository accountRepository = new AccountRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());

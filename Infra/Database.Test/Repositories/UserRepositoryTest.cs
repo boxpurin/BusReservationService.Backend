@@ -47,28 +47,38 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
                 (System.Data.Common.DbConnection)conn, 
                 new RespawnerOptions{
                     DbAdapter = DbAdapter.Postgres,
+                    TablesToIgnore = new Respawn.Graph.Table[] { "prefectures" }
             });
         }
 
         // 1. 全テーブルのデータを空にする
         await _respawner.ResetAsync((System.Data.Common.DbConnection)conn);
-
-        // 2. テストが始まる前に、SeedデータをDapperで直接流し込んで復元する
-        var seedSqlPath = Path.GetFullPath("Sql/Seeds/001_seeds.sql");
-        var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-        await conn.ExecuteAsync(seedSql);
     }
     
-    public IDbConnection CreateConnection()
+
+    // IDbConnection を生成して返すファクトリメソッド
+    public async Task<IDbConnection> CreateConnectionAsync(string[]? seedSqlPaths = null)
     {
-        return dbService!.CreateConnection();
+        var conn = dbService!.CreateConnection();
+
+        if (seedSqlPaths is not null)
+        {
+            foreach(var path in seedSqlPaths)
+            {
+                var seedSqlPath = Path.GetFullPath(path);
+                var seedSql = await File.ReadAllTextAsync(seedSqlPath);
+                await conn.ExecuteAsync(seedSql);            
+            }
+        }
+
+        return conn;
     }
 
     [Fact]
     public async Task Add_User_Exist_Account()
     {
         IUserRepository userRepository = new UserRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var dto = new AddAsymcDto(
@@ -91,7 +101,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
     public async Task Add_User_Not_Exist_Account()
     {
         IUserRepository userRepository = new UserRepository(
-            CreateConnection()
+            await CreateConnectionAsync()
         );
 
         var dto = new AddAsymcDto(
@@ -114,7 +124,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
     public async Task UpdateUser()
     {
         IUserRepository userRepository = new UserRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var prev = TestUsers.ExistPersonalUser;
@@ -141,7 +151,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
     public async Task FindByAccountId()
     {        
         IUserRepository userRepository = new UserRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var user = await userRepository.FindByAccountIdAsync(
@@ -159,7 +169,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
     public async Task ExistByAccountId()
     {
         IUserRepository userRepository = new UserRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var user = await userRepository.ExistByAccountIdAsync(
@@ -178,7 +188,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
     public async Task DeleteUser()
     {
         IUserRepository userRepository = new UserRepository(
-            CreateConnection()
+            await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
         var deleted = await userRepository.DeleteByAccountIdAsync(

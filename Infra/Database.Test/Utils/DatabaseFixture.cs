@@ -12,11 +12,11 @@ public class DatabaseFixture : IAsyncLifetime
     .WithPassword("password")
     .WithBindMount(
         Path.GetFullPath("Migrations/20260911084734_init.sql"), 
-        "/docker-entrypoint-initdb.d/01_init.sql", 
+        "/docker-entrypoint-initdb.d/001_init.sql", 
         AccessMode.ReadOnly)
     .WithBindMount(
-        Path.GetFullPath("Sql/Seeds/001_seeds.sql"), 
-        "/docker-entrypoint-initdb.d/02_seeds.sql", 
+        Path.GetFullPath("Migrations/20261017011239_prefecture.sql"), 
+        "/docker-entrypoint-initdb.d/002_prefecture.sql", 
         AccessMode.ReadOnly)
     .Build();
 
