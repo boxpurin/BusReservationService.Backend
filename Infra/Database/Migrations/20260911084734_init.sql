@@ -113,8 +113,8 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
    ON UPDATE CASCADE
    ON DELETE NO ACTION,
   
-   "incoming" timestamp with time zone NOT NULL,
-   "outgoing" timestamp with time zone NOT NULL,
+   "incoming_datetime" timestamp with time zone NOT NULL,
+   "outgoing_datetime" timestamp with time zone NOT NULL,
    "reservation_status" "text" default 'pending'
    CHECK (reservation_status IN (
        'pending', -- 予約待ち
