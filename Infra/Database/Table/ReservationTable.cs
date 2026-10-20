@@ -1,5 +1,4 @@
-﻿
-using BusReservationService.Database.Enums;
+﻿using BusReservationService.Database.Enums;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Share;
 
@@ -13,13 +12,23 @@ internal class ReservationTable : IConvertibleToDomain<ReservationEntity>
     public DateTime IncomingDateTime { get; set; }
     public DateTime OutgoingDateTime { get; set; }
     public ReservationStatus ReservationStatus { get; set; }
-    public string CampanyName {get; set;} = string.Empty;
+    public string BusCampanyName {get; set;} = string.Empty;
     public DateTime? CanceledAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
     public ReservationEntity ToDomain()
     {
-        throw new NotImplementedException();
+        return ReservationEntity
+        .FromSnapshot(
+            Id,
+            AccountId,
+            ParkingLotId,
+            IncomingDateTime,
+            OutgoingDateTime,
+            ReservationStatus.ToDomain(),
+            BusCampanyName,
+            CanceledAt
+        );
     }
 }

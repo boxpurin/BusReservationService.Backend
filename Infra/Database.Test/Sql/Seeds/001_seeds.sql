@@ -18,3 +18,18 @@ VALUES
 ('00000000-0000-0000-0000-000000000001',
 'FirstName','LastName','1234567','東京都千代田区1-1-1',
 '090-0000-0000','06-0000-0000', 'personal') ;
+
+
+
+INSERT INTO parking_lots(
+    id,
+    display_name, prefecture_id, zip_code, street_address, phone_number, fax_number,
+    max_capacity, reservation_capacity, is_allows_boarding_alighting, is_active
+)
+VALUES
+('00000000-0000-0000-0000-000000000001',
+'テスト駐車場', 1 , '1234567', '東京都千代田区1-1-1', '06-1234-5678', '06-4321-8765',
+100, 50, false, true) ,
+('00000000-0000-0000-0000-000000000002',
+'Test駐車場', 1 , '1234567', '東京都千代田区1-1-1', '06-1234-5678', '06-4321-8765',
+20, 10, true, true);

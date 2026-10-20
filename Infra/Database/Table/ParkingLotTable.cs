@@ -1,4 +1,5 @@
 ﻿using BusReservationService.Domain.Entity;
+using BusReservationService.Domain.Model;
 using BusReservationService.Share;
 
 namespace BusReservationService.Database.Table;
@@ -21,6 +22,18 @@ public class ParkingLotTable : IConvertibleToDomain<ParkingLotEntity>
 
     public ParkingLotEntity ToDomain()
     {
-        throw new NotImplementedException();
+        return ParkingLotEntity.FromSnapshot(
+            Id,
+            DisplayName,
+            ZipCode,
+            PrefectureExtensions.FromIndex(PrefectureId),
+            StreetAddress,
+            PhoneNumber,
+            FaxNumber,
+            MaxCapacity,
+            ReservationCapacity,
+            IsAllowsBoardingAlighting,
+            IsActive
+        );
     }
 }
