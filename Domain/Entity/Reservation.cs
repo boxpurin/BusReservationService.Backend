@@ -9,7 +9,7 @@ public class ReservationEntity
     public Guid ParkingLotId { get; private set; }
     public DateTime IncomingDateTime { get; private set; }
     public DateTime OutgoingDateTime { get; private set; }
-    public ReservationStatus Status { get; private set; }
+    public ReservationStatus ReservationStatus { get; private set; }
     public string BusCampanyName { get; private set; }
     public DateTime? CanceledAt { get; private set; }
 
@@ -29,7 +29,7 @@ public class ReservationEntity
         ParkingLotId = parkingLotId;
         IncomingDateTime = inComingDateTime;
         OutgoingDateTime = outGoingDateTime;
-        Status = reservationStatus;
+        ReservationStatus = reservationStatus;
         BusCampanyName = busCampanyName;
         CanceledAt = canceledAt;
     }
@@ -39,9 +39,7 @@ public class ReservationEntity
         Guid parkingLotId,
         DateTime inComingDateTime,
         DateTime outGoingDateTime,
-        ReservationStatus reservationStatus,
-        string busCampanyName,
-        DateTime? canceledAt)
+        string busCampanyName)
     {
         return new ReservationEntity(
             Guid.CreateVersion7(),
@@ -49,9 +47,9 @@ public class ReservationEntity
             parkingLotId,
             inComingDateTime,
             outGoingDateTime,
-            reservationStatus,
+            ReservationStatus.Confirmed,
             busCampanyName,
-            canceledAt
+            null
         );
     }
     

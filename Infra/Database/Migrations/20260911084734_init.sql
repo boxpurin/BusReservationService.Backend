@@ -107,8 +107,8 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
    ON UPDATE CASCADE
    ON DELETE NO ACTION,
   
-   "lot_id" "uuid" NOT NULL ,
-   constraint fk_parking_lot FOREIGN KEY ("lot_id")
+   "parking_lot_id" "uuid" NOT NULL ,
+   constraint fk_parking_lot FOREIGN KEY ("parking_lot_id")
    REFERENCES "public"."parking_lots"("id")
    ON UPDATE CASCADE
    ON DELETE NO ACTION,
@@ -119,12 +119,12 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
    CHECK (reservation_status IN (
        'pending', -- 予約待ち
        'confirmed', -- 予約確定
-       'cancelled', -- 予約キャンセル
+       'canceled', -- 予約キャンセル
        'completed' -- 予約完了(期日を過ぎた予約)
    )),
   
    "bus_campany_name" "text",
-   "cancelled_at" timestamp with time zone,
+   "canceled_at" timestamp with time zone,
    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
@@ -142,7 +142,7 @@ CREATE INDEX parking_lots_prefecture_id_idx ON public.parking_lots USING btree (
 CREATE INDEX reservations_account_id_idx ON public.reservations USING btree (account_id);
 -- アカウントの特定の日の予約一覧を取得する
 -- select * from public.reservations where account_id = $1 AND CAST(incoming AS DATE) = '2026-09-01';
-CREATE INDEX reservations_account_id_incoming_idx ON public.reservations USING btree (account_id, incoming DESC);
+CREATE INDEX reservations_account_id_incoming_idx ON public.reservations USING btree (account_id, incoming_datetime DESC);
 
 
 -- CREATE STATISTICS
