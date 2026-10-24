@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 namespace BusReservationService.Endpoints.Auth;
 
 using ResponseType = Results<Ok, UnauthorizedHttpResult, InternalServerError>;
-internal class Singin(
+internal class Signin(
     IAccountUserQueryService accountUserQueryService) : Endpoint<SinginRequest, ResponseType>
 {
     public override void Configure()

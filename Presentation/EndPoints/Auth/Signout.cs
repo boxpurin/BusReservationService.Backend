@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 namespace BusReservationService.Endpoints.Auth;
 
 using ResponseType = Results<NoContent, BadRequest, InternalServerError>;
-public class Singout() : Endpoint<SingoutRequest, ResponseType>
+public class Signout() : Endpoint<SingoutRequest, ResponseType>
 {    public override void Configure()
     {
         Verbs(Http.POST);

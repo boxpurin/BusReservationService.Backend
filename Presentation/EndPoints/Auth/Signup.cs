@@ -1,6 +1,7 @@
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Models;
+using BusReservationService.Services.Interface;
 using BusReservationService.Util;
 using FastEndpoints;
 using FastEndpoints.Security;
@@ -14,7 +15,7 @@ using ResponseType = Results<
     Created<SingupResponse>, 
     Conflict>;
 
-internal class Singup(IAccountRepository AccountRepository) : Endpoint<SingupRequest, ResponseType>
+internal class Signup(IRegistrationAccountService registrationAccountService) : Endpoint<SingupRequest, ResponseType>
 {
 
     public override void Configure()
@@ -26,26 +27,20 @@ internal class Singup(IAccountRepository AccountRepository) : Endpoint<SingupReq
     
     public override async Task<ResponseType> HandleAsync(SingupRequest req, CancellationToken c)
     {
-        var account = await AccountRepository.FindByEmailAsync(req.Email);
-        if (account is not null)
+        var account = await registrationAccountService.RegistrationAccountAsync(req.Email, req.Password);
+        if(account is null)
         {
             return TypedResults.Conflict();
         }
-        
-        // リクエストのパスワードのハッシュ化
-        var (hash , salt) = Argon2Helper.HashPassword(req.Password);
-        AccountEntity entity = AccountEntity.CreateUserRoleAccount(req.Email, hash , salt);
-
-        var result = await AccountRepository.AddAsync(entity);
 
         await CookieAuth.SignInAsync(u =>
         {
-            u["AccountId"] = result?.Id.ToString()!;
+            u["AccountId"] = account.Id.ToString()!;
         });
 
         return TypedResults.Created(
-            $"/auth/signup/{result.Id}",
-            new SingupResponse(new AccountModel(result))
+            $"/auth/signup/{account.Id}",
+            new SingupResponse(account)
         );
     }
 }
