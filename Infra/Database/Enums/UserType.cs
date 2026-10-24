@@ -1,4 +1,4 @@
-using UserTypeDomain = BusReservationService.Domain.ValueObject.UserType;
+using UserTypeDomain = BusReservationService.Domain.ValueObject.UserType.UserType;
 namespace BusReservationService.Database.Enums;
 
 internal enum UserType

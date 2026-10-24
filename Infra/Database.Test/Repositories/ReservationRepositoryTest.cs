@@ -1,11 +1,12 @@
 using System.Data;
-using BusReservationService.Database.Enums;
 using BusReservationService.Database.Repository;
 using BusReservationService.Database.Service;
 using BusReservationService.Database.Table;
 using BusReservationService.Database.Test.Utils;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
+using BusReservationService.Domain.ValueObject.Prefecture;
+using BusReservationService.Domain.ValueObject.ReservationStatus;
 using Dapper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -38,7 +39,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
     private readonly ParkingLotEntity _existParkingLot = ParkingLotEntity.CreateNewParkingLotEntity
     (
         "Test駐車場", "1234567", 
-        Domain.Model.Prefecture.Tokyo, "東京都千代田区1-1-1",
+        Prefecture.Tokyo, "東京都千代田区1-1-1",
         "06-1234-1234", null, 20, 10, false ,true
     );
 
@@ -201,7 +202,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             table.ParkingLotId,
             table.IncomingDateTime,
             table.OutgoingDateTime.AddHours(-6),
-            Domain.ValueObject.ReservationStatus.Canceled,
+            ReservationStatus.Canceled,
             table.BusCampanyName,
             DateTime.Now
         );

@@ -5,6 +5,7 @@ using BusReservationService.Database.Table;
 using BusReservationService.Database.Test.Utils;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
+using BusReservationService.Domain.ValueObject.Prefecture;
 using Dapper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -81,7 +82,7 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         );
 
         var dto = new AddParkingLotDto(
-            "AddTest駐車場", "1234567", Domain.Model.Prefecture.Gifu, "東京都千代田区1-1-1", 
+            "AddTest駐車場", "1234567", Prefecture.Gifu, "東京都千代田区1-1-1", 
             "06-1234-1232", "06-6123-3213", 20, 10);
 
         var entity = await repository.AddAsync(dto);
@@ -100,7 +101,7 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         conn.Open();
 
         var seed = ParkingLotEntity.CreateNewParkingLotEntity(
-            "TestInit駐車場", "1234567", Domain.Model.Prefecture.Hokkaido,  "東京都千代田区1-1-1",
+            "TestInit駐車場", "1234567", Prefecture.Hokkaido,  "東京都千代田区1-1-1",
             "090-0000-0000", "06-0000-0000", 20, 10, true, true
         );
 
@@ -111,7 +112,7 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
             table.Id,
             "Updated駐車場", 
             table.ZipCode, 
-            Domain.Model.PrefectureExtensions.FromIndex(table.PrefectureId), 
+            PrefectureExtensions.FromIndex(table.PrefectureId), 
             table.StreetAddress, 
             table.PhoneNumber, 
             table.FaxNumber, 
@@ -143,10 +144,10 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
             await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
-        var lots = await repository.FindByPrefactureIdAsync(Domain.Model.Prefecture.Hokkaido);
+        var lots = await repository.FindByPrefactureIdAsync(Prefecture.Hokkaido);
         lots.Length.Should().Be(2);
         
-        lots = await repository.FindByPrefactureIdAsync(Domain.Model.Prefecture.Okinawa);
+        lots = await repository.FindByPrefactureIdAsync(Prefecture.Okinawa);
         lots.Length.Should().Be(0);
     }
     

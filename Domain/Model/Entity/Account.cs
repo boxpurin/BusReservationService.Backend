@@ -1,4 +1,5 @@
-﻿using BusReservationService.Domain.ValueObject;
+﻿using BusReservationService.Domain.ValueObject.AccountStatus;
+using BusReservationService.Domain.ValueObject.AccountRole;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BusReservationService.Domain.Entity;

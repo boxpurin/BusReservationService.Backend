@@ -1,4 +1,4 @@
-﻿using BusReservationService.Domain.Model;
+﻿using BusReservationService.Domain.ValueObject.Prefecture;
 using BusReservationService.Share;
 
 namespace BusReservationService.Database.Table;

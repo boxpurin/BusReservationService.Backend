@@ -2,7 +2,7 @@ namespace BusReservationService.Endpoints.Auth;
 
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
-using BusReservationService.Domain.ValueObject;
+using BusReservationService.Domain.ValueObject.UserType;
 using BusReservationService.Models;
 using BusReservationService.Services.Interface;
 using FastEndpoints;

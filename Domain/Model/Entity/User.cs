@@ -1,4 +1,4 @@
-﻿using BusReservationService.Domain.ValueObject;
+﻿using BusReservationService.Domain.ValueObject.UserType;
 
 namespace BusReservationService.Domain.Entity;
 
