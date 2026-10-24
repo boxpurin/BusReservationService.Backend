@@ -25,7 +25,7 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync ()
+    public async ValueTask InitializeAsync ()
     {        
         var inMemorySettings = new Dictionary<string, string?>
         {
@@ -188,5 +188,5 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         return table;
     }
     
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

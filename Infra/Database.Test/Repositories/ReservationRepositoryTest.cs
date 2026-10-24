@@ -74,7 +74,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         )};
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var inMemorySettings = new Dictionary<string, string?>
         {
@@ -372,5 +372,5 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         return conn;
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

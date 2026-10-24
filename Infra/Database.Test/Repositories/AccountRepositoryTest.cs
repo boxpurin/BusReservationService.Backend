@@ -22,7 +22,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     {
         _fixture = fixture;
     }
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {        
         var inMemorySettings = new Dictionary<string, string?>
         {
@@ -243,5 +243,5 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         account.Should().BeNull();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 };

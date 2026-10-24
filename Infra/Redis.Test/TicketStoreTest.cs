@@ -19,7 +19,7 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
     private RedisTicketStore? _store;
 
     // テスト開始時に Redis コンテナを起動
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _redisContainer = new RedisBuilder("redis:7-alpine").Build();
         await _redisContainer.StartAsync();
@@ -96,7 +96,7 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
 
 
     // テスト終了時にコンテナを破棄
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (_redis != null) await _redis.DisposeAsync();
         if (_redisContainer != null) await _redisContainer.DisposeAsync();
