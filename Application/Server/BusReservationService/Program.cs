@@ -11,14 +11,15 @@ using FastEndpoints;
 using FastEndpoints.Security;
 using System.Data;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Database Management Service
-builder.Services.AddSingleton<DatabaseService>();
+builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
 builder.Services.AddScoped<IDbConnection>(sp =>
 {
     var factory =
-        sp.GetRequiredService<DatabaseService>();
+        sp.GetRequiredService<IDatabaseService>();
 
     return factory.CreateConnection();
 });
@@ -31,6 +32,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddServiceSessionStore(builder.Configuration);
 
 // Application Service
+builder.Services.AddScoped<IOnboardUserProfileService, OnboarduserProfileService>();
+builder.Services.AddScoped<IRegistrationAccountService, RegistrationAccountService>();
 
 // Application Query Service
 builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
@@ -58,3 +61,6 @@ app.UseAuthentication()
    .UseFastEndpoints();
 
 app.Run();
+
+// テストプロジェクトから参照できるように公開する
+public class ApiMarker { }

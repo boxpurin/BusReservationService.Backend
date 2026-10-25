@@ -15,9 +15,7 @@ using FastEndpoints;
 /// <param name="SessionService">セッション管理</param>
 /// <param name="AccountRepository">アカウント情報のリポジトリ</param>
 /// <param name="UserRepository">ユーザー情報のリポジトリ</param>
-public class Activate(
-    IAccountRepository AccountRepository,
-    IUserRepository UserRepository) : Endpoint<ActivateRequest>
+public class Activate(IOnboardUserProfileService onboardUserProfileService) : Endpoint<ActivateRequest, ActivateResponse>
 {
     public override void Configure()
     {
@@ -29,27 +27,9 @@ public class Activate(
 
     public override async Task HandleAsync(ActivateRequest req, CancellationToken c)
     {
-
-        // アカウント情報を習得
-        var account = await AccountRepository.FindByAccountIdAsync(req.AccountId);
-        if (account is null)
-        {
-            AddError("アカウント情報が存在しません。");
-            await Send.ErrorsAsync(401);
-            return;
-        }
-
-        // すでにユーザー情報が追加されているアカウントIDなのかを確認する
-        if (await UserRepository.ExistByAccountIdAsync(req.AccountId))
-        {
-            AddError("このアカウントにはユーザー情報がすでに登録されています。");
-            await Send.ErrorsAsync(415);
-            return;
-        }
-
-        var entity = UserEntity.CreateUserEntity(
-            req.AccountId, 
-            req.FirstName, 
+        await onboardUserProfileService.OnboardUserProfile(
+            req.AccountId,
+            req.FirstName,
             req.LastName,
             req.ZipCode,
             req.StreetAddress,
@@ -58,24 +38,7 @@ public class Activate(
             req.UserType
         );
 
-        // ユーザーの登録
-        var user = await UserRepository.AddAsymc(new AddAsymcDto(
-            req.AccountId, 
-            req.FirstName, 
-            req.LastName,
-            req.ZipCode,
-            req.StreetAddress,
-            req.PhoneNumber,
-            req.FaxNumber,
-            req.UserType
-        ));
-
-        // アカウントの有効化
-        account.Activate();
-        // アカウント情報の更新
-        account = await AccountRepository.UpdateAsync(account);
-
-        await Send.CreatedAtAsync("/auth/activate");
+        await Send.CreatedAtAsync("/auth/activate", new ActivateResponse());
     }
 }
 
@@ -91,3 +54,5 @@ public record ActivateRequest(
     [FromClaim]
     public Guid AccountId {get; set;}
 }
+
+public record ActivateResponse();

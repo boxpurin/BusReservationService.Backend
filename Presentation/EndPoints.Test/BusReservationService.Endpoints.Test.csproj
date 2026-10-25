@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <!-- SqlScriptsフォルダ内のすべての.sqlファイルを対象にする -->
+    <None Update="Sql\Seeds\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\Infra\Database\Migrations\**\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Migrations\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FastEndpoints.Testing" Version="8.3.0" />
+    <PackageReference Include="Respawn" Version="7.0.0" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.16.0" />
+    <PackageReference Include="Testcontainers.Redis" Version="4.16.0" />
+    <PackageReference Include="Testcontainers.XunitV3" Version="4.16.0" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Application/Core/BusReservationService.Application.Core.csproj" />
+    <ProjectReference Include="../../Application/Server/BusReservationService/BusReservationService.csproj" />
+    <ProjectReference Include="../../Domain/BusReservationService.Domain.csproj" />
+    <ProjectReference Include="../EndPoints/BusReservationService.Endpoints.csproj" />
+  </ItemGroup>
+
+</Project>

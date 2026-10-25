@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace BusReservationService.Database.Service;
 
-public class DatabaseService
+public class DatabaseService : BusReservationService.Services.Interface.IDatabaseService
 {
     string _connectionString;
 

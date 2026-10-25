@@ -8,18 +8,16 @@ namespace BusReservationService.Models;
 public class AccountModel
 {
     public Guid Id { get; set; }
-    public string Email { get; set; }
-    public byte[] PasswordHash { get; set; }
+    public string Email { get; set; } = string.Empty;
     public AccountRole AccountRole { get; set; }
     public AccountStatus AccountStatus { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public DateTime? ActivatedAt { get; set; }
-
+    public AccountModel() { }
     public AccountModel(AccountEntity entity)
     {
         Id = entity.Id;
         Email = entity.Email;
-        PasswordHash = entity.PasswordHash;
         AccountRole = AccountRole;
         AccountStatus = AccountStatus;
         LastLoginAt = entity.LastLoginAt;

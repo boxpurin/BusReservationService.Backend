@@ -10,6 +10,11 @@
     <Project Path="Application/Core/BusReservationService.Application.Core.csproj" />
     <Project Path="Application/Server/BusReservationService/BusReservationService.csproj" />
   </Folder>
+  <Folder Name="/Presentation/" />
+
+  <Folder Name="/Presentation/EndPoints.Test/">
+    <Project Path="Presentation/EndPoints.Test/BusReservationService.Endpoints.Test.csproj" />
+  </Folder>
 
   <Folder Name="/Presentation/EndPoints/">
     <Project Path="Presentation/EndPoints/BusReservationService.Endpoints.csproj" />
