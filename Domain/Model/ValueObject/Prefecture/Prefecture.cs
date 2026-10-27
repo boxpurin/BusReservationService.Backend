@@ -1,4 +1,4 @@
-﻿namespace BusReservationService.Domain.Model;
+﻿namespace BusReservationService.Domain.ValueObject.Prefecture;
 
 public enum Prefecture : byte
 {

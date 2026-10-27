@@ -4,6 +4,8 @@ using BusReservationService.Database.Service;
 using BusReservationService.Database.Test.Utils;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
+using BusReservationService.Domain.ValueObject.UserType;
+using BusReservationService.Services.Interface;
 using Dapper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +17,7 @@ namespace BusReservationService.Database.Test.Repositories;
 public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
 {
     private readonly DatabaseFixture _fixture;
-    private DatabaseService? dbService = null;
+    private IDatabaseService? dbService = null;
     private Respawner? _respawner = null;
 
     public UserRepositoryTest(DatabaseFixture fixture)
@@ -23,7 +25,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {        
         var inMemorySettings = new Dictionary<string, string?>
         {
@@ -89,7 +91,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             "東京都千代田区1-1-1",
             "090-0000-0000",
             null,
-            Domain.ValueObject.UserType.Personal
+            UserType.Personal
         );
 
         var user = await userRepository.AddAsymc(dto);
@@ -112,7 +114,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             "東京都千代田区1-1-1",
             "090-0000-0000",
             null,
-            Domain.ValueObject.UserType.Personal
+            UserType.Personal
         );
 
         Func<Task> act = async () => await userRepository.AddAsymc(dto);
@@ -137,7 +139,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             "東京都千代田区1-1-1",
             "070-0000-1234",
             "07-1234-5678",
-            Domain.ValueObject.UserType.Personal
+            UserType.Personal
         );
 
         var ret = await userRepository.UpdateAsync(expect);
@@ -206,5 +208,5 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
     }
 
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

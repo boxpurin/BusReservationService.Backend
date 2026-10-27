@@ -1,4 +1,4 @@
-namespace BusReservationService.Domain.ValueObject;
+namespace BusReservationService.Domain.ValueObject.ReservationStatus;
 
 public enum ReservationStatus
 {

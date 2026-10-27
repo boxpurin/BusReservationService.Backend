@@ -1,7 +1,7 @@
 ﻿using BusReservationService.Database.Interface;
 using BusReservationService.Database.Table;
 using BusReservationService.Domain.Entity;
-using BusReservationService.Domain.Model;
+using BusReservationService.Domain.ValueObject.Prefecture;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Share;
 using Dapper;

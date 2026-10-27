@@ -1,4 +1,4 @@
-﻿using AccountRoleDomain = BusReservationService.Domain.ValueObject.AccountRole;
+﻿using AccountRoleDomain = BusReservationService.Domain.ValueObject.AccountRole.AccountRole;
 
 namespace BusReservationService.Database.Enums;
 

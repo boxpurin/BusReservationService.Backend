@@ -22,10 +22,10 @@ public class DatabaseFixture : IAsyncLifetime
 
     public string ConnectionString => DbContainer.GetConnectionString();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await DbContainer.StartAsync();
     }
 
-    public Task DisposeAsync() => DbContainer.DisposeAsync().AsTask();
+    public ValueTask DisposeAsync() => DbContainer.DisposeAsync();
 }

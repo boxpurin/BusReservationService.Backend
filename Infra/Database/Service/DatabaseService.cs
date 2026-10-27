@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace BusReservationService.Database.Service;
 
-public class DatabaseService
+public class DatabaseService : BusReservationService.Services.Interface.IDatabaseService
 {
     string _connectionString;
 
@@ -40,20 +40,20 @@ public class DatabaseService
             new LowercaseEnumTypeHandler<ReservationStatus>());
         
         SqlMapper.AddTypeHandler(
-            typeof(Domain.ValueObject.AccountStatus),
-            new LowercaseEnumTypeHandler<Domain.ValueObject.AccountStatus>());
+            typeof(Domain.ValueObject.AccountStatus.AccountStatus),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.AccountStatus.AccountStatus>());
 
         SqlMapper.AddTypeHandler(
-            typeof(Domain.ValueObject.AccountRole),
-            new LowercaseEnumTypeHandler<Domain.ValueObject.AccountRole>());
+            typeof(Domain.ValueObject.AccountRole.AccountRole),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.AccountRole.AccountRole>());
 
         SqlMapper.AddTypeHandler(
-            typeof(Domain.ValueObject.UserType),
-            new LowercaseEnumTypeHandler<Domain.ValueObject.UserType>());
+            typeof(Domain.ValueObject.UserType.UserType),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.UserType.UserType>());
 
         SqlMapper.AddTypeHandler(
-            typeof(Domain.ValueObject.ReservationStatus),
-            new LowercaseEnumTypeHandler<Domain.ValueObject.ReservationStatus>());
+            typeof(Domain.ValueObject.ReservationStatus.ReservationStatus),
+            new LowercaseEnumTypeHandler<Domain.ValueObject.ReservationStatus.ReservationStatus>());
     }
 
     public IDbConnection CreateConnection()

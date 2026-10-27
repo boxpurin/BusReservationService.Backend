@@ -1,5 +1,5 @@
 ﻿using BusReservationService.Domain.Entity;
-using BusReservationService.Domain.ValueObject;
+using BusReservationService.Domain.ValueObject.UserType;
 using BusReservationService.Share;
 
 namespace BusReservationService.Domain.Repository;

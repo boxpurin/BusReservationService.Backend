@@ -1,5 +1,6 @@
 
 using BusReservationService.Domain.Entity;
+using BusReservationService.Domain.ValueObject.UserType;
 
 namespace BusReservationService.Database.Test.Utils;
 
@@ -9,7 +10,7 @@ internal static class TestUsers
         Guid.Parse("00000000-0000-0000-0000-000000000001"),
         "FirstName", "LastName", 
         "1234567", "東京都千代田区1-1-1",
-        "090-0000-0000", "06-0000-0000", Domain.ValueObject.UserType.Personal
+        "090-0000-0000", "06-0000-0000", UserType.Personal
     );
 
     public static readonly Guid NotExistId =

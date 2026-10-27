@@ -1,4 +1,6 @@
-using BusReservationService.Domain.ValueObject;
+using BusReservationService.Domain.ValueObject.AccountRole;
+using BusReservationService.Domain.ValueObject.AccountStatus;
+using BusReservationService.Domain.ValueObject.UserType;
 
 namespace BusReservationService.Models;
 public class AccountUserModel

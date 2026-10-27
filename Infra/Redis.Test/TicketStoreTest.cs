@@ -19,7 +19,7 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
     private RedisTicketStore? _store;
 
     // テスト開始時に Redis コンテナを起動
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _redisContainer = new RedisBuilder("redis:7-alpine").Build();
         await _redisContainer.StartAsync();
@@ -39,8 +39,8 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), "Scheme");
 
         // 2. Act
-        var key = await _store!.StoreAsync(ticket);
-        var retrieved = await _store.RetrieveAsync(key);
+        var key = await _store!.StoreAsync(ticket,TestContext.Current.CancellationToken);
+        var retrieved = await _store.RetrieveAsync(key, TestContext.Current.CancellationToken);
 
         // 3. Assert
         retrieved.Should().NotBeNull();
@@ -61,16 +61,16 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
         );
 
         // Act
-        var key = await _store!.StoreAsync(ticket);
+        var key = await _store!.StoreAsync(ticket, TestContext.Current.CancellationToken);
         
         // 直後は取得できる
-        (await _store.RetrieveAsync(key)).Should().NotBeNull();
+        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).Should().NotBeNull();
 
         // 2.5秒待つ
-        await Task.Delay(2500);
+        await Task.Delay(2500, TestContext.Current.CancellationToken);
 
         // Assert: Redis の TTL で自動消滅していることを検証
-        (await _store.RetrieveAsync(key)).Should().BeNull();
+        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).Should().BeNull();
     }
 
     
@@ -88,15 +88,15 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
         );
 
         // Act
-        var key = await _store!.StoreAsync(ticket);
+        var key = await _store!.StoreAsync(ticket, TestContext.Current.CancellationToken);
         
         // 期限切れのチケットは追加されていない
-        (await _store.RetrieveAsync(key)).Should().BeNull();
+        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).Should().BeNull();
     }
 
 
     // テスト終了時にコンテナを破棄
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (_redis != null) await _redis.DisposeAsync();
         if (_redisContainer != null) await _redisContainer.DisposeAsync();
