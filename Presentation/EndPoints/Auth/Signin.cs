@@ -46,4 +46,5 @@ internal class Signin(
 }
 
 
-public record SinginRequest(string Email, string Password);
+internal record SignInRequest(string Email, string Password);
+internal record SignInResponse();

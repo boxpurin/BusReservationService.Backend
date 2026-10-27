@@ -23,9 +23,11 @@ public class Signout() : Endpoint<SingoutRequest, ResponseType>
     }
 }
 
-public record SingoutRequest()
+internal record SignOutRequest()
 {
     [FromClaim]
     public Guid AccountId {get; set;}
 }
+
+internal record SignOutResponse();
 
