@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using BusReservationService.Domain.Model;
+using BusReservationService.Domain.ValueObject.Prefecture;
 
 namespace BusReservationService.Domain.Entity;
 

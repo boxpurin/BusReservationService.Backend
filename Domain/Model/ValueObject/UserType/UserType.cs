@@ -1,4 +1,4 @@
-﻿namespace BusReservationService.Domain.ValueObject;
+﻿namespace BusReservationService.Domain.ValueObject.UserType;
 public enum UserType
 {
     // 個人顧客

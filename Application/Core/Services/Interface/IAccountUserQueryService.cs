@@ -1,4 +1,5 @@
 using BusReservationService.Models;
+namespace BusReservationService.Services.Interface;
 
 public interface IAccountUserQueryService
 {

@@ -1,6 +1,6 @@
 using Xunit;
 using BusReservationService.Database.Enums;
-using UserTypeDomain = BusReservationService.Domain.ValueObject.UserType;
+using UserTypeDomain = BusReservationService.Domain.ValueObject.UserType.UserType;
 using Dapper;
 using System.Data;
 using Microsoft.Data.Sqlite;

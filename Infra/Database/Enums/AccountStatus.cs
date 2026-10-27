@@ -1,4 +1,4 @@
-﻿using AccountStatusDomain = BusReservationService.Domain.ValueObject.AccountStatus;
+﻿using AccountStatusDomain = BusReservationService.Domain.ValueObject.AccountStatus.AccountStatus;
 
 namespace BusReservationService.Database.Enums;
 

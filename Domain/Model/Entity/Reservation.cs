@@ -1,4 +1,4 @@
-﻿using BusReservationService.Domain.ValueObject;
+﻿using BusReservationService.Domain.ValueObject.ReservationStatus;
 
 namespace BusReservationService.Domain.Entity;
 

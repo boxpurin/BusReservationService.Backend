@@ -1,6 +1,6 @@
 ﻿using Xunit;
 using BusReservationService.Database.Enums;
-using AccountStatusDomain = BusReservationService.Domain.ValueObject.AccountStatus;
+using AccountStatusDomain = BusReservationService.Domain.ValueObject.AccountStatus.AccountStatus;
 using Dapper;
 using System.Data;
 using Microsoft.Data.Sqlite;

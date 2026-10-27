@@ -1,5 +1,6 @@
 using System.Data;
 using BusReservationService.Models;
+using BusReservationService.Services.Interface;
 using Dapper;
 
 namespace BusReservationService.Services.Query;
@@ -9,18 +10,18 @@ namespace BusReservationService.Services.Query;
 /// <param name="DbConnection">データベース接続</param>
 public class AccountUserQueryService(IDbConnection DbConnection) 
 : IAccountUserQueryService
-{    
+{
     public async Task<AccountUserModel?> GetModelByAccountIdAsync(Guid accountId)
     {
         string sql = """
-        SELECT a.id , a.email, a.password, u.first_name, u.last_name, u.phone_number, a.account_role, a.account_status, u.user_type
+        SELECT a.id AS "AccountId", a.email, a.password_hash, a.password_salt, u.first_name, u.last_name, u.phone_number, a.account_role, a.account_status, u.user_type
         FROM public.accounts AS a
         INNER JOIN public.users AS u
         ON a.id = u.account_id
         WHERE a.id = @AccountId
         """;
 
-        var model = await DbConnection.QueryFirstAsync<AccountUserModel>(
+        var model = await DbConnection.QuerySingleOrDefaultAsync<AccountUserModel>(
             sql, 
             new { AccountId = accountId }
         );
@@ -31,14 +32,14 @@ public class AccountUserQueryService(IDbConnection DbConnection)
     public async Task<AccountUserModel?> GetModelByEmailAsync(string email)
     {
         string sql = """
-        SELECT a.id , a.email, a.password, u.first_name, u.last_name, u.phone_number, a.account_role, a.account_status, u.user_type
+        SELECT a.id AS "AccountId" , a.email, a.password_hash, a.password_salt, u.first_name, u.last_name, u.phone_number, a.account_role, a.account_status, u.user_type
         FROM public.accounts AS a
         INNER JOIN public.users AS u
         ON a.id = u.account_id
         WHERE a.email = @Email
         """;
 
-        var model = await DbConnection.QueryFirstAsync<AccountUserModel>(
+        var model = await DbConnection.QuerySingleOrDefaultAsync<AccountUserModel>(
             sql, 
             new { Email = email }
         );
