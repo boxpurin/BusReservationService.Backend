@@ -1,21 +1,16 @@
-using BusReservationService.Domain.Entity;
-using BusReservationService.Domain.Repository;
 using BusReservationService.Models;
 using BusReservationService.Services.Interface;
-using BusReservationService.Util;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+
+
+using ResponseType = Microsoft.AspNetCore.Http.HttpResults.Results<
+    Microsoft.AspNetCore.Http.HttpResults.Created<BusReservationService.Endpoints.Auth.SignupResponse>,
+    Microsoft.AspNetCore.Http.HttpResults.Conflict>;
 
 namespace BusReservationService.Endpoints.Auth;
-
-
-using ResponseType = Results<
-    Created<SignupResponse>, 
-    Conflict>;
-
 internal class Signup(IRegistrationAccountService registrationAccountService) : Endpoint<SignupRequest, ResponseType>
 {
 

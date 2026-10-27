@@ -2,7 +2,6 @@ using BusReservationService.Endpoints.Test;
 using BusReservationService.Endpoints.Auth;
 using FastEndpoints.Testing;
 using Microsoft.Extensions.Options;
-using FluentValidation.Results;
 using Shouldly;
 using FluentValidation.TestHelper;
 

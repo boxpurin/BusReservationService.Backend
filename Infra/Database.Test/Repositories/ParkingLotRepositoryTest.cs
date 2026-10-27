@@ -6,6 +6,7 @@ using BusReservationService.Database.Test.Utils;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.Prefecture;
+using BusReservationService.Services.Interface;
 using Dapper;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,7 @@ namespace BusReservationService.Database.Test.Repositories;
 public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
 {
     private readonly DatabaseFixture _fixture;
-    private DatabaseService? dbService = null;
+    private IDatabaseService? dbService = null;
     private Respawner? _respawner = null;
 
     public ParkingLotRepositoryTest(DatabaseFixture fixture)

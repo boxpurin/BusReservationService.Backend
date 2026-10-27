@@ -1,22 +1,23 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using FastEndpoints;
 using FastEndpoints.Security;
-using BusReservationService.Services.Interface;
-using BusReservationService.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace BusReservationService.Endpoints.Auth;
+using ResponseType = Microsoft.AspNetCore.Http.HttpResults.Results<
+    Microsoft.AspNetCore.Http.HttpResults.NoContent,
+    Microsoft.AspNetCore.Http.HttpResults.BadRequest,
+    Microsoft.AspNetCore.Http.HttpResults.InternalServerError>;
 
-using ResponseType = Results<NoContent, BadRequest, InternalServerError>;
-public class Signout() : Endpoint<SingoutRequest, ResponseType>
-{    public override void Configure()
+namespace BusReservationService.Endpoints.Auth;
+internal class Signout() : Endpoint<SignOutRequest, ResponseType>
+{
+    public override void Configure()
     {
         Verbs(Http.POST);
         Routes("/auth/singout");
         AllowAnonymous();
     }
 
-    public override async Task<ResponseType> HandleAsync(SingoutRequest req,CancellationToken c)
+    public override async Task<ResponseType> ExecuteAsync(SignOutRequest req,CancellationToken c)
     {
         await CookieAuth.SignOutAsync();
         return TypedResults.NoContent();

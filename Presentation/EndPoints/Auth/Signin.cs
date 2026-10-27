@@ -1,17 +1,17 @@
-using BusReservationService.Domain.Repository;
-using BusReservationService.Models;
 using BusReservationService.Services.Interface;
 using BusReservationService.Util;
 using FastEndpoints;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+
+using ResponseType = Microsoft.AspNetCore.Http.HttpResults.Results<
+    Microsoft.AspNetCore.Http.HttpResults.Ok,
+    Microsoft.AspNetCore.Http.HttpResults.UnauthorizedHttpResult,
+    Microsoft.AspNetCore.Http.HttpResults.InternalServerError>;
 
 namespace BusReservationService.Endpoints.Auth;
-
-using ResponseType = Results<Ok, UnauthorizedHttpResult, InternalServerError>;
 internal class Signin(
-    IAccountUserQueryService accountUserQueryService) : Endpoint<SinginRequest, ResponseType>
+    IAccountUserQueryService accountUserQueryService) : Endpoint<SignInRequest, ResponseType>
 {
     public override void Configure()
     {
@@ -20,7 +20,7 @@ internal class Signin(
         AllowAnonymous();
     }
 
-    public override async Task<ResponseType> HandleAsync(SinginRequest req, CancellationToken c)
+    public override async Task<ResponseType> ExecuteAsync(SignInRequest req, CancellationToken c)
     {
         
         var accountUser = await accountUserQueryService.GetModelByEmailAsync(req.Email);
@@ -33,7 +33,7 @@ internal class Signin(
         if(!Argon2Helper.VerifyPassword(req.Password, accountUser.PasswordHash, accountUser.PasswordSalt))
         {
             AddError("サインインに失敗しました。");
-            return TypedResults.Unauthorized();            
+            return TypedResults.Unauthorized();
         }
 
         await CookieAuth.SignInAsync(u =>

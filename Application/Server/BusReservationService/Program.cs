@@ -46,7 +46,7 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-var dbService = app.Services.GetRequiredService<DatabaseService>();
+var dbService = app.Services.GetRequiredService<IDatabaseService>();
 dbService.ConfigureMappings();
 
 // Configure the HTTP request pipeline.

@@ -85,3 +85,5 @@ public class MyApp : AppFixture<ApiMarker>
 
     protected override ValueTask TearDownAsync() => ValueTask.CompletedTask;
 }
+
+public class CollectionEndPoints : TestCollection<MyApp> {}

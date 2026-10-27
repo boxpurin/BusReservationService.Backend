@@ -8,6 +8,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using BusReservationService.Database.Test.Utils;
 using Respawn;
+using BusReservationService.Services.Interface;
 
 
 namespace BusReservationService.Database.Test.Repositories;
@@ -15,7 +16,7 @@ namespace BusReservationService.Database.Test.Repositories;
 public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifetime
 {
     private readonly DatabaseFixture _fixture;
-    private DatabaseService? dbService = null;
+    private IDatabaseService? dbService = null;
     private Respawner? _respawner = null;
 
     public AccountRepositoryTest(DatabaseFixture fixture)
