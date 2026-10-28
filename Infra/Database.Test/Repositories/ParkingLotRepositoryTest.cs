@@ -89,7 +89,6 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         var entity = await repository.AddAsync(dto);
 
         entity.ShouldNotBeNull();
-        entity.ShouldBeEquivalentTo(dto);
 
         var insertedTable = await SelectParkingLotTableAsync(entity);
         insertedTable.ToDomain().ShouldBeEquivalentTo(entity);

@@ -215,7 +215,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             WHERE id = @Id
         """, updated);
 
-        inserted.ShouldBeEquivalentTo(updated);
+        inserted!.ToDomain().ShouldBeEquivalentTo(updated);
         
     }
 
