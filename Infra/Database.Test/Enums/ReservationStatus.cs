@@ -5,7 +5,7 @@ using Dapper;
 using System.Data;
 using Microsoft.Data.Sqlite;
 using System.Runtime.InteropServices;
-using FluentAssertions;
+using Shouldly;
 
 namespace BusReservationService.Database.Test.Enums;
 
@@ -27,7 +27,7 @@ public class ReservationStatus_UnitTest
         foreach (var (val, name) in zipped){
             if(Enum.TryParse<ReservationStatusDomain>(name, false, out var domain))
             {
-                val.ToDomain().Should().Be(domain);
+                val.ToDomain().ShouldBe(domain);
             }
         } 
     }
@@ -46,7 +46,7 @@ public class ReservationStatus_UnitTest
 
         foreach (var (val, name) in zipped){
             var domain = Enum.Parse<ReservationStatusDomain>(name);
-            val.ToDomain().Should().Be(domain);            
+            val.ToDomain().ShouldBe(domain);            
         } 
     }
 }

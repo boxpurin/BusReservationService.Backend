@@ -7,8 +7,8 @@ using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.Prefecture;
 using BusReservationService.Services.Interface;
+using Shouldly;
 using Dapper;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
@@ -27,7 +27,7 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
     }
 
     public async ValueTask InitializeAsync ()
-    {        
+    {
         var inMemorySettings = new Dictionary<string, string?>
         {
             ["ConnectionStrings:DefaultConnection"] = _fixture.ConnectionString
@@ -68,7 +68,7 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
             {
                 var seedSqlPath = Path.GetFullPath(path);
                 var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-                await conn.ExecuteAsync(seedSql);            
+                await conn.ExecuteAsync(seedSql);
             }
         }
 
@@ -88,11 +88,11 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
 
         var entity = await repository.AddAsync(dto);
 
-        entity.Should().NotBeNull();
-        entity.Should().BeEquivalentTo(dto);
+        entity.ShouldNotBeNull();
+        entity.ShouldBeEquivalentTo(dto);
 
         var insertedTable = await SelectParkingLotTableAsync(entity);
-        insertedTable.ToDomain().Should().BeEquivalentTo(entity);
+        insertedTable.ToDomain().ShouldBeEquivalentTo(entity);
     }
 
     [Fact]
@@ -129,13 +129,13 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
 
         var updatedEntity = await repository.UpdateAsync(expect);
 
-        updatedEntity.Should().NotBeNull();
-        updatedEntity.Should().BeEquivalentTo(expect);
+        updatedEntity.ShouldNotBeNull();
+        updatedEntity.ShouldBeEquivalentTo(expect);
 
         var updatedTable = await SelectParkingLotTableAsync(expect);
 
-        updatedTable.Id.Should().Be(updatedEntity.Id);
-        updatedTable.DisplayName.Should().Be(updatedEntity.ParkingLotName);
+        updatedTable.Id.ShouldBe(updatedEntity.Id);
+        updatedTable.DisplayName.ShouldBe(updatedEntity.ParkingLotName);
     }
 
     [Fact]
@@ -146,10 +146,10 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         );
 
         var lots = await repository.FindByPrefactureIdAsync(Prefecture.Hokkaido);
-        lots.Length.Should().Be(2);
+        lots.Length.ShouldBe(2);
         
         lots = await repository.FindByPrefactureIdAsync(Prefecture.Okinawa);
-        lots.Length.Should().Be(0);
+        lots.Length.ShouldBe(0);
     }
     
     private async Task<ParkingLotTable[]> InsertParkingLotAsync(object? param = null)

@@ -8,8 +8,8 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.Prefecture;
 using BusReservationService.Domain.ValueObject.ReservationStatus;
 using BusReservationService.Services.Interface;
+using Shouldly;
 using Dapper;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
@@ -152,7 +152,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             WHERE id = @Id
         """, added);
 
-        inserted!.ToDomain().Should().BeEquivalentTo(added);
+        inserted!.ToDomain().ShouldBeEquivalentTo(added);
 
         expected = ReservationEntity.CreateNewReservation
         (
@@ -164,7 +164,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         );
         
         Func<Task> act = async () => await reservationRepository.AddAsync(expected);
-        await act.Should().ThrowAsync<Npgsql.PostgresException>();
+        await act.ShouldThrowAsync<Npgsql.PostgresException>();
 
     }
 
@@ -215,7 +215,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             WHERE id = @Id
         """, updated);
 
-        inserted.Should().BeEquivalentTo(updated);
+        inserted.ShouldBeEquivalentTo(updated);
         
     }
 
@@ -249,12 +249,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         , arrange);
 
         var exist = await reservationRepository.FindByReservationIdAsync(arrange.Id);
-        exist.Should().NotBeNull();
-        exist.Id.Should().Be(arrange.Id);
+        exist.ShouldNotBeNull();
+        exist.Id.ShouldBe(arrange.Id);
 
         // 適当な存在しないIDを流す
         var notExist = await reservationRepository.FindByReservationIdAsync(_notExistAccount.Id);
-        notExist.Should().BeNull();
+        notExist.ShouldBeNull();
     }
 
     [Fact]
@@ -284,12 +284,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         , ArrangeReservations);
 
         var exists = await reservationRepository.FindByAccountIdAsync(_existAccount.Id);
-        exists.Should().NotBeNull();
-        exists.Length.Should().Be(ArrangeReservations.Length);
+        exists.ShouldNotBeNull();
+        exists.Length.ShouldBe(ArrangeReservations.Length);
 
         // 適当な存在しないIDを流す
         var notExist = await reservationRepository.FindByAccountIdAsync(_notExistAccount.Id);
-        notExist.Should().BeEmpty();
+        notExist.ShouldBeEmpty();
     }
 
     [Fact]
@@ -315,12 +315,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         , ArrangeReservations);
 
         var exists = await reservationRepository.FindByParkingLotIdAsync(_existParkingLot.Id);
-        exists.Should().NotBeNull();
-        exists.Length.Should().Be(ArrangeReservations.Length);
+        exists.ShouldNotBeNull();
+        exists.Length.ShouldBe(ArrangeReservations.Length);
 
         // 適当な存在しないIDを流す
         var notExist = await reservationRepository.FindByParkingLotIdAsync(_notExistAccount.Id);
-        notExist.Should().BeEmpty();
+        notExist.ShouldBeEmpty();
     }
 
     [Fact]
@@ -348,10 +348,10 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var target = ArrangeReservations.First();
 
         var result = await reservationRepository.DeleteByReservationIdAsync(target.Id);
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
         
         result = await reservationRepository.DeleteByReservationIdAsync(target.Id);
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
         
     }
 

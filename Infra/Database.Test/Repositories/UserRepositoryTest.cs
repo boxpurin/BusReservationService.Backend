@@ -7,7 +7,7 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.UserType;
 using BusReservationService.Services.Interface;
 using Dapper;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
@@ -96,7 +96,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
 
         var user = await userRepository.AddAsymc(dto);
 
-        user.Should().NotBeNull();
+        user.ShouldNotBeNull();
     }
     
     [Fact]
@@ -119,7 +119,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
 
         Func<Task> act = async () => await userRepository.AddAsymc(dto);
 
-        await act.Should().ThrowAsync<Npgsql.PostgresException>();
+        await act.ShouldThrowAsync<Npgsql.PostgresException>();
     }
 
     [Fact]
@@ -144,9 +144,9 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
 
         var ret = await userRepository.UpdateAsync(expect);
 
-        ret.Should().NotBeNull();
+        ret.ShouldNotBeNull();
 
-        ret.Should().BeEquivalentTo(expect);
+        ret.ShouldBeEquivalentTo(expect);
     }
 
     [Fact]
@@ -159,12 +159,12 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
         var user = await userRepository.FindByAccountIdAsync(
             TestUsers.ExistPersonalUser.AccountId
         );
-        user.Should().NotBeNull();
+        user.ShouldNotBeNull();
 
         user = await userRepository.FindByAccountIdAsync(
             TestAccountIds.NotExistId
         );
-        user.Should().BeNull();
+        user.ShouldBeNull();
     }
 
     [Fact]
@@ -177,12 +177,12 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
         var user = await userRepository.ExistByAccountIdAsync(
             TestUsers.ExistPersonalUser.AccountId
         );
-        user.Should().Be(true);
+        user.ShouldBe(true);
         
         user = await userRepository.ExistByAccountIdAsync(
             TestUsers.NotExistId
         );
-        user.Should().Be(false);
+        user.ShouldBe(false);
     }
 
     
@@ -197,13 +197,13 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             TestUsers.ExistPersonalUser.AccountId
         );
 
-        deleted.Should().Be(true);
+        deleted.ShouldBe(true);
         
         deleted = await userRepository.DeleteByAccountIdAsync(
             TestUsers.ExistPersonalUser.AccountId
         );
 
-        deleted.Should().Be(false);
+        deleted.ShouldBe(false);
 
     }
 

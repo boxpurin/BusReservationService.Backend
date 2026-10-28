@@ -1,5 +1,5 @@
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 using Moq;
 using Testcontainers.Redis;
 using Microsoft.AspNetCore.Authentication;
@@ -43,8 +43,8 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
         var retrieved = await _store.RetrieveAsync(key, TestContext.Current.CancellationToken);
 
         // 3. Assert
-        retrieved.Should().NotBeNull();
-        retrieved!.Principal.Identity!.Name.Should().Be("RealRedisUser");
+        retrieved.ShouldNotBeNull();
+        retrieved!.Principal.Identity!.Name.ShouldBe("RealRedisUser");
     }
 
     [Fact]
@@ -64,13 +64,13 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
         var key = await _store!.StoreAsync(ticket, TestContext.Current.CancellationToken);
         
         // 直後は取得できる
-        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).Should().NotBeNull();
+        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).ShouldNotBeNull();
 
         // 2.5秒待つ
         await Task.Delay(2500, TestContext.Current.CancellationToken);
 
         // Assert: Redis の TTL で自動消滅していることを検証
-        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).Should().BeNull();
+        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).ShouldBeNull();
     }
 
     
@@ -91,7 +91,7 @@ public class RedisTicketStoreIntegrationTests  : IAsyncLifetime
         var key = await _store!.StoreAsync(ticket, TestContext.Current.CancellationToken);
         
         // 期限切れのチケットは追加されていない
-        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).Should().BeNull();
+        (await _store.RetrieveAsync(key, TestContext.Current.CancellationToken)).ShouldBeNull();
     }
 
 
