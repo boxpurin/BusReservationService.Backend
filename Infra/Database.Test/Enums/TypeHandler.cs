@@ -7,9 +7,9 @@ using Microsoft.Data.Sqlite;
 using System.Runtime.InteropServices;
 using System.Data.Common;
 using static Dapper.SqlMapper;
-using FluentAssertions;
 using Moq;
 using BusReservationService.Share;
+using Shouldly;
 
 namespace BusReservationService.Database.Test.Enums;
 public class TypeHandler_UnitTest
@@ -26,7 +26,7 @@ public class TypeHandler_UnitTest
     internal void Parse_ShouldBeFromSnakeCase_WithTypeHandler(string val, AccountStatus expected)
     {
         var result = AccountStatusHandler.Parse(val);
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -43,7 +43,7 @@ public class TypeHandler_UnitTest
 
         AccountStatusHandler.SetValue(mockParam.Object, val);
 
-        mockParam.Object.Value.Should().Be(expected);
-        mockParam.Object.DbType.Should().Be(DbType.String);
+        mockParam.Object.Value.ShouldBe(expected);
+        mockParam.Object.DbType.ShouldBe(DbType.String);
     }
 }

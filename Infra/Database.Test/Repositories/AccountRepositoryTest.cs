@@ -1,9 +1,9 @@
-using FluentAssertions;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Database.Repository;
 using System.Data;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Database.Service;
+using Shouldly;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using BusReservationService.Database.Test.Utils;
@@ -24,7 +24,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         _fixture = fixture;
     }
     public async ValueTask InitializeAsync()
-    {        
+    {
         var inMemorySettings = new Dictionary<string, string?>
         {
             ["ConnectionStrings:DefaultConnection"] = _fixture.ConnectionString
@@ -66,7 +66,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
             {
                 var seedSqlPath = Path.GetFullPath(path);
                 var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-                await conn.ExecuteAsync(seedSql);            
+                await conn.ExecuteAsync(seedSql);
             }
         }
 
@@ -91,14 +91,14 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
     
         var result = await accountRepository.AddAsync(account);
 
-        result.Id.Should().NotBeEmpty();
-        result.Email.Should().Be(account.Email);
-        result.PasswordHash.Should().Equal(account.PasswordHash);
-        result.PasswordSalt.Should().Equal(account.PasswordSalt);
-        result.AccountStatus.Should().Be(account.AccountStatus);
-        result.AccountRole.Should().Be(account.AccountRole);
-        result.ActivatedAt.Should().BeNull();
-        result.LastLoginAt.Should().BeNull();
+        result.Id.ShouldNotBe(Guid.Empty);
+        result.Email.ShouldBe(account.Email);
+        result.PasswordHash.ShouldBe(account.PasswordHash);
+        result.PasswordSalt.ShouldBe(account.PasswordSalt);
+        result.AccountStatus.ShouldBe(account.AccountStatus);
+        result.AccountRole.ShouldBe(account.AccountRole);
+        result.ActivatedAt.ShouldBeNull();
+        result.LastLoginAt.ShouldBeNull();
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         account!.Activate();
         account = await accountRepository.UpdateAsync(account);
 
-        account.Should().NotBeNull();
+        account.ShouldNotBeNull();
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
 
         var accounts = await accountRepository.GetAllAsync();
 
-        accounts.Length.Should().Be(TestAccountIds.IDList.Length);
+        accounts.Length.ShouldBe(TestAccountIds.IDList.Length);
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
 
         var account = await accountRepository!.FindByEmailAsync("test1@example.com");
-        account.Should().NotBeNull();
+        account.ShouldNotBeNull();
     }
 
     
@@ -148,7 +148,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
 
         var account = await accountRepository!.FindByEmailAsync("not_exist_address@example.com");
-        account.Should().BeNull();
+        account.ShouldBeNull();
     }
     
     [Fact]
@@ -162,7 +162,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
             TestAccountIds.IDList.First()
         );
 
-        account.Should().NotBeNull();
+        account.ShouldNotBeNull();
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         var account = await accountRepository!.FindByAccountIdAsync(
             TestAccountIds.NotExistId
         );
-        account.Should().BeNull();
+        account.ShouldBeNull();
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
 
         var ret = await accountRepository!.IsExistByEmailAsync("test1@example.com");
-        ret.Should().Be(true);
+        ret.ShouldBe(true);
     }
 
     
@@ -199,7 +199,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
 
         var ret = await accountRepository!.IsExistByEmailAsync("not_exist_address@example.com");
-        ret.Should().Be(false);
+        ret.ShouldBe(false);
     }
     
     [Fact]
@@ -210,7 +210,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
         
         var ret = await accountRepository!.IsExistByAccountIdAsync(TestAccountIds.IDList.First());
-        ret.Should().Be(true);
+        ret.ShouldBe(true);
     }
 
     
@@ -222,7 +222,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         );
         
         var ret = await accountRepository!.IsExistByAccountIdAsync(TestAccountIds.NotExistId);
-        ret.Should().Be(false);
+        ret.ShouldBe(false);
     }
 
     [Fact]
@@ -235,13 +235,13 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
         var account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());
 
         bool deleted = await accountRepository.DeleteAsync(account!);
-        deleted.Should().Be(true);
+        deleted.ShouldBe(true);
         
         deleted = await accountRepository.DeleteAsync(account!);
-        deleted.Should().Be(false);
+        deleted.ShouldBe(false);
 
         account = await accountRepository!.FindByAccountIdAsync(TestAccountIds.IDList.First());
-        account.Should().BeNull();
+        account.ShouldBeNull();
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
