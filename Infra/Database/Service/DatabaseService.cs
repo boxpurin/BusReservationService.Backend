@@ -15,6 +15,7 @@ public class DatabaseService : BusReservationService.Services.Interface.IDatabas
         _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
             "DB connection string is not configured.");
+        ConfigureMappings();
     }
 
     // Dapperのマッピング設定
