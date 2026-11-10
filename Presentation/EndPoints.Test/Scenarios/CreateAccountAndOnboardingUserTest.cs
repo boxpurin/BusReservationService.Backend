@@ -58,12 +58,41 @@ public class CreateAccountAndOnboardingUserTest(MyApp App) : TestBase
         var (signInMsg, SignInRes) = await App.Client.POSTAsync<Signin, SignInRequest, SignInResponse>(
             signInReq
         );
-
-
-
         signInMsg.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
-        var (signOutRsp, _) = await App.Client.POSTAsync<Signout, SignOutRequest, SignOutResponse>(new SignOutRequest());
-        signOutRsp.StatusCode.ShouldBe(System.Net.HttpStatusCode.NoContent);
+        // 1. このアプリのCookieが発行されていること
+        signInMsg.Headers.Contains("Set-Cookie").ShouldBeTrue();
+
+        var cookies = SetCookieHeaderValue.ParseList(
+        signInMsg.Headers.GetValues("Set-Cookie").ToList());
+    
+        var cookie = cookies.Single(x =>
+        x.Name.ToString() == options.Cookie.Name);
+        
+        var referenceTicket = options.TicketDataFormat
+            .Unprotect(cookie.Value.ToString());
+
+        referenceTicket.ShouldNotBeNull();
+
+        // ASP.NET CoreがSessionStore参照用に設定する内部Claim
+        var sessionKey = referenceTicket.Principal.FindFirst(
+            "Microsoft.AspNetCore.Authentication.Cookies-SessionId")?.Value;
+
+        sessionKey.ShouldNotBeNullOrWhiteSpace();
+        options.SessionStore.ShouldNotBeNull();
+
+        var ticket = await options.SessionStore.RetrieveAsync(sessionKey!, TestContext.Current.CancellationToken);
+
+        ticket.ShouldNotBeNull();
+        ticket.Principal.Identity!.IsAuthenticated.ShouldBeTrue();
+        ticket.Principal.FindFirst("AccountId")?.Value
+        .ShouldBe(activateResponse.Account.Id.ToString());
+
+        ticket.Properties.ExpiresUtc.ShouldNotBeNull();
+        (ticket.Properties.ExpiresUtc.Value > DateTimeOffset.UtcNow)
+        .ShouldBeTrue();
+
+        var (signOutMsg, _) = await App.Client.POSTAsync<Signout, EmptyRequest>();
+        signOutMsg.StatusCode.ShouldBe(System.Net.HttpStatusCode.NoContent);
     }
 }
