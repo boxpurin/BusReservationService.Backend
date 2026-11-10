@@ -34,7 +34,7 @@ public class AccountRepositoryTest : IClassFixture<DatabaseFixture>,IAsyncLifeti
             .AddInMemoryCollection(inMemorySettings)
             .Build();
             
-        dbService = new DatabaseService(_configuration);
+        dbService = new NpgsqlDatabaseService(_configuration);
         dbService.ConfigureMappings();
         
         using var conn = dbService.CreateConnection();

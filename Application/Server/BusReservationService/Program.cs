@@ -15,7 +15,7 @@ using System.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Database Management Service
-builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
+builder.Services.AddSingleton<IDatabaseService, NpgsqlDatabaseService>();
 builder.Services.AddScoped<IDbConnection>(sp =>
 {
     var factory =
@@ -45,9 +45,6 @@ builder.Services.AddPresentationEndpoints(builder.Configuration);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
-
-var dbService = app.Services.GetRequiredService<IDatabaseService>();
-dbService.ConfigureMappings();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -3,18 +3,24 @@ using BusReservationService.Database.Enums;
 using Microsoft.Extensions.Configuration;
 using Dapper;
 using Npgsql;
+using BusReservationService.Services.Interface;
 
 namespace BusReservationService.Database.Service;
 
-public class DatabaseService : BusReservationService.Services.Interface.IDatabaseService
+/// <summary>
+/// Npgsqlを使用したデータベースサービスの実装
+/// </summary>
+public class NpgsqlDatabaseService : IDatabaseService
 {
     string _connectionString;
 
-    public DatabaseService(IConfiguration configuration)
+    public NpgsqlDatabaseService(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
             "DB connection string is not configured.");
+
+        ConfigureMappings();
     }
 
     // Dapperのマッピング設定
