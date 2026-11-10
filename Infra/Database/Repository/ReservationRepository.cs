@@ -27,13 +27,9 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
             RETURNING * ;
         """;
 
-        var tx = connection.BeginTransaction();
-
         var table = await connection.QuerySingleAsync<ReservationTable>(
-            sql, reservation, tx
+            sql, reservation
         );
-
-        tx.Commit();
 
         return table.ToDomain();
     }
@@ -56,13 +52,9 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
             RETURNING * ;
         """;
 
-        var tx = connection.BeginTransaction();
-
         var table = await connection.QuerySingleAsync<ReservationTable>(
-            sql, reservation, tx
+            sql, reservation
         );
-
-        tx.Commit();
 
         return table.ToDomain();
     }
@@ -112,6 +104,24 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
         return row?.ToDomain();
     }
 
+    public async Task<ReservationEntity[]> FindOverlappingByParkingLotIdAsync(Guid parkingLotId, DateTime from, DateTime to)
+    {
+        EnsureConnectionOpen(connection);
+
+        var sql = """
+        SELECT * FROM reservations WHERE parking_lot_id = @ParkingLotId
+        AND reservation_status != 'canceled'
+        AND incoming_datetime < @To
+        AND outgoing_datetime > @From;
+        """;
+
+        var rows = await connection.QueryAsync<ReservationTable>(
+            sql, new { ParkingLotId = parkingLotId, From = from, To = to }
+        );
+
+        return rows.Select(x => x.ToDomain()).ToArray();
+    }
+
     public async Task<bool> ExistByReservationIdAsync(Guid reservationId)
     {
         EnsureConnectionOpen(connection);
@@ -134,11 +144,8 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
         DELETE FROM reservations WHERE account_id = @Id
         """;
 
-        var tx = connection.BeginTransaction();
+        var ret = await connection.ExecuteAsync(sql, new { id = accountId });
 
-        var ret = await connection.ExecuteAsync(sql, new { id = accountId }, tx);
-
-        tx.Commit();
         
         return ret;
     }
@@ -168,11 +175,7 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
         DELETE FROM reservations WHERE id = @Id
         """;
 
-        var tx = connection.BeginTransaction();
-
-        var ret = await connection.ExecuteAsync(sql, new { id = reservationId }, tx);
-
-        tx.Commit();
+        var ret = await connection.ExecuteAsync(sql, new { id = reservationId });
 
         return ret == 1;
     }

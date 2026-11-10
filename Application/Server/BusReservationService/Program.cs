@@ -27,6 +27,7 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 // Domain Repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 
 // Session Management Service
@@ -39,6 +40,9 @@ builder.Services.AddScoped<IAuthAccountService, AuthUserAccountService>();
 
 // Application Query Service
 builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
+
+// Reservation Command Service
+builder.Services.AddScoped<IReservationCommandService, ReservationCommandService>();
 
 builder.Services.AddPresentationEndpoints(builder.Configuration);
 

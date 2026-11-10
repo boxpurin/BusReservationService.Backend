@@ -74,4 +74,15 @@ public class ReservationEntity
             canceledAt
         );
     }
+
+    public void Confirm()
+    {
+        ReservationStatus = ReservationStatus.Confirmed;
+    }
+
+    public void Cancel()
+    {
+        ReservationStatus = ReservationStatus.Canceled;
+        CanceledAt = DateTime.Now;
+    }
 }
