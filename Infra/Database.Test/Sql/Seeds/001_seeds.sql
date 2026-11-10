@@ -3,7 +3,7 @@ INSERT INTO "public"."accounts"
 VALUES 
 ('00000000-0000-0000-0000-000000000001', 'test1@example.com', '\x01020304', '\x04030201', 'just_created', 'user') ,
 ('00000000-0000-0000-0000-000000000002', 'test2@example.com', '\x01020304', '\x04030201', 'pending_email_verification', 'user') ,
-('00000000-0000-0000-0000-000000000003', 'test3@example.com', '\x01020304', '\x04030201', 'onboarding', 'user') ,
+('00000000-0000-0000-0000-000000000003', 'test3@example.com', '\x01020304', '\x04030201', 'on_boarding', 'user') ,
 ('00000000-0000-0000-0000-000000000004', 'test4@example.com', '\x01020304', '\x04030201', 'activated', 'user') ,
 ('00000000-0000-0000-0000-000000000005', 'test5@example.com', '\x01020304', '\x04030201', 'suspended', 'user') ,
 ('00000000-0000-0000-0000-000000000006', 'test6@example.com', '\x01020304', '\x04030201', 'just_created', 'guest') ,

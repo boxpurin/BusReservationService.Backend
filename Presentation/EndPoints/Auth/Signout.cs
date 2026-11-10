@@ -2,33 +2,25 @@ using FastEndpoints;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Http;
 
-using ResponseType = Microsoft.AspNetCore.Http.HttpResults.Results<
-    Microsoft.AspNetCore.Http.HttpResults.NoContent,
-    Microsoft.AspNetCore.Http.HttpResults.BadRequest,
-    Microsoft.AspNetCore.Http.HttpResults.InternalServerError>;
-
 namespace BusReservationService.Endpoints.Auth;
-internal class Signout() : Endpoint<SignOutRequest, ResponseType>
+
+/// <summary>
+/// サインアウトを行うエンドポイントです。
+/// Cookieから認証情報を削除します。
+/// </summary>
+internal class Signout() : EndpointWithoutRequest
 {
     public override void Configure()
     {
         Verbs(Http.POST);
-        Routes("/auth/singout");
+        Routes("/auth/signout");
         AllowAnonymous();
     }
 
-    public override async Task<ResponseType> ExecuteAsync(SignOutRequest req,CancellationToken c)
+    public override async Task HandleAsync(CancellationToken c)
     {
         await CookieAuth.SignOutAsync();
-        return TypedResults.NoContent();
+
+        await Send.NoContentAsync();
     }
 }
-
-internal record SignOutRequest()
-{
-    [FromClaim]
-    public Guid AccountId {get; set;}
-}
-
-internal record SignOutResponse();
-

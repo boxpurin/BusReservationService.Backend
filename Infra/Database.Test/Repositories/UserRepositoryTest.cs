@@ -83,7 +83,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             await CreateConnectionAsync(["Sql/Seeds/001_seeds.sql"])
         );
 
-        var dto = new AddAsymcDto(
+        var dto = new AddAsyncDto(
             TestAccountIds.IDList[1],
             "First",
             "Last",
@@ -94,7 +94,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             UserType.Personal
         );
 
-        var user = await userRepository.AddAsymc(dto);
+        var user = await userRepository.AddAsync(dto);
 
         user.ShouldNotBeNull();
     }
@@ -106,7 +106,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             await CreateConnectionAsync()
         );
 
-        var dto = new AddAsymcDto(
+        var dto = new AddAsyncDto(
             TestAccountIds.NotExistId,
             "First",
             "Last",
@@ -117,7 +117,7 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             UserType.Personal
         );
 
-        Func<Task> act = async () => await userRepository.AddAsymc(dto);
+        Func<Task> act = async () => await userRepository.AddAsync(dto);
 
         await act.ShouldThrowAsync<Npgsql.PostgresException>();
     }

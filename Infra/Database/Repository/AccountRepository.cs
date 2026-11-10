@@ -14,17 +14,13 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
     {
         EnsureConnectionOpen(connection);
 
-        using var tx = connection.BeginTransaction();
-
         const string sql = """
                 INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
                 VALUES (@Id, @Email, @PasswordHash, @PasswordSalt, @AccountStatus, @AccountRole)
                 RETURNING *;
             """;
 
-        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account, tx);
-
-        tx.Commit();
+        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account);
 
         return ret.ToDomain();
     }
@@ -33,7 +29,6 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
     public async Task<AccountEntity> UpdateAsync(AccountEntity account)
     {
         EnsureConnectionOpen(connection);
-        using var tx = connection.BeginTransaction();
 
         const string sql = """
                 UPDATE public.accounts
@@ -47,9 +42,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 RETURNING *;
             """;
 
-        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account, tx);
-
-        tx.Commit();
+        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account);
 
         return ret.ToDomain();
     }
@@ -118,14 +111,11 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
     public async Task<bool> DeleteAsync(AccountEntity account)
     {
         EnsureConnectionOpen(connection);
-        using var tx = connection.BeginTransaction();
         var sql = """
             DELETE FROM accounts WHERE Id = @Id;
             """;
 
-        var ret = await connection.ExecuteAsync(sql, account, tx);
-
-        tx.Commit();
+        var ret = await connection.ExecuteAsync(sql, account);
 
         return ret == 1;
     }

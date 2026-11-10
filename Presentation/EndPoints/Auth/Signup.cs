@@ -1,42 +1,47 @@
 using BusReservationService.Models;
 using BusReservationService.Services.Interface;
+using BusReservationService.Share;
+using BusReservationService.Share.Utils.Error;
+using BusReservationService.Stores.Interface;
 using FastEndpoints;
 using FastEndpoints.Security;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-
-
-using ResponseType = Microsoft.AspNetCore.Http.HttpResults.Results<
-    Microsoft.AspNetCore.Http.HttpResults.Created<BusReservationService.Endpoints.Auth.SignupResponse>,
-    Microsoft.AspNetCore.Http.HttpResults.Conflict>;
-
 namespace BusReservationService.Endpoints.Auth;
-internal class Signup(IRegistrationAccountService registrationAccountService) : Endpoint<SignupRequest, ResponseType>
+internal class Signup(
+    IRegistrationAccountService registrationAccountService, 
+    IActivationSessionStore activationSessionStore) : Endpoint<SignupRequest, SignupResponse>
 {
 
     public override void Configure()
     {
         Verbs(Http.POST);
-        Routes("/auth/singup");
+        Routes("/auth/signup");
         AllowAnonymous();
     }
     
-    public override async Task<ResponseType> ExecuteAsync(SignupRequest req, CancellationToken c)
+    public override async Task HandleAsync(SignupRequest req, CancellationToken c)
     {
-        var account = await registrationAccountService.RegistrationAccountAsync(req.Email, req.Password);
-        if(account is null)
+        var result = await registrationAccountService.RegistrationAccountAsync(req.Email, req.Password);
+        if(result is Err<AccountModel, Error> err)
         {
-            return TypedResults.Conflict();
+            AddError(err.Value.Message, err.Value.ErrorCode);
+            await Send.ErrorsAsync(err.Value.StatusCode);
+            return;
         }
 
+        var account = result.Unwrap();
+        var activationSessionId = await activationSessionStore.CreateAsync(account.Id, c);
+        
         await CookieAuth.SignInAsync(u =>
         {
-            u["AccountId"] = account.Id.ToString()!;
+            u["ActivationSessionId"] = activationSessionId;
+            u.Roles.Add("User");
         });
 
-        return TypedResults.Created(
-            $"/auth/signup/{account.Id}",
-            new SignupResponse(account)
+        await Send.CreatedAtAsync(
+            $"/user/profile",
+            responseBody: new SignupResponse(account),
+            cancellation: c
         );
     }
 }
