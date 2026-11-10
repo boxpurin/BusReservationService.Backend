@@ -6,10 +6,10 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Models;
 using BusReservationService.Services;
 using BusReservationService.Services.Interface;
-using BusReservationService.Services.Query;
 using FastEndpoints;
-using FastEndpoints.Security;
 using System.Data;
+using BusReservationService.Infra.Database.Service.Query;
+using BusReservationService.Infra.Database.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,12 +28,14 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+
 // Session Management Service
 builder.Services.AddServiceSessionStore(builder.Configuration);
 
 // Application Service
-builder.Services.AddScoped<IOnboardUserProfileService, OnboarduserProfileService>();
+builder.Services.AddScoped<IOnboardUserProfileService, OnboardUserProfileService>();
 builder.Services.AddScoped<IRegistrationAccountService, RegistrationAccountService>();
+builder.Services.AddScoped<IAuthAccountService, AuthUserAccountService>();
 
 // Application Query Service
 builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();

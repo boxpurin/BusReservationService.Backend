@@ -24,7 +24,7 @@ public class ActivateValidatorTest
             Domain.ValueObject.UserType.UserType.Personal
         )
         {
-            AccountId = Guid.CreateVersion7()
+            ActivationSessionId = "testSessionId"
         };
 
         var validate = _validator.TestValidate(model);

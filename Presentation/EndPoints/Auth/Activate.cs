@@ -1,14 +1,13 @@
 using BusReservationService.Domain.ValueObject.UserType;
 using BusReservationService.Models;
 using BusReservationService.Services.Interface;
+using BusReservationService.Share;
+using BusReservationService.Share.Utils.Error;
+using BusReservationService.Stores.Interface;
 using FastEndpoints;
+using FastEndpoints.Security;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using ResponseType = Microsoft.AspNetCore.Http.HttpResults.Results<
-    Microsoft.AspNetCore.Http.HttpResults.Created<BusReservationService.Endpoints.Auth.ActivateResponse>,
-    Microsoft.AspNetCore.Http.HttpResults.UnauthorizedHttpResult,
-    Microsoft.AspNetCore.Http.HttpResults.InternalServerError
->;
+
 namespace BusReservationService.Endpoints.Auth;
 
 
@@ -21,20 +20,30 @@ namespace BusReservationService.Endpoints.Auth;
 /// <param name="SessionService">セッション管理</param>
 /// <param name="AccountRepository">アカウント情報のリポジトリ</param>
 /// <param name="UserRepository">ユーザー情報のリポジトリ</param>
-internal class Activate(IOnboardUserProfileService onboardUserProfileService) : Endpoint<ActivateRequest, ResponseType>
+internal class Activate(
+    IOnboardUserProfileService onboardUserProfileService,
+    IActivationSessionStore activationSessionStore) : Endpoint<ActivateRequest, ActivateResponse>
 {
     public override void Configure()
     {
         Verbs(Http.POST);
         Routes("/auth/activate");
-        Claims("AccountId");
-        AllowAnonymous();
+        Claims("ActivationSessionId");
     }
 
-    public override async Task<ResponseType> ExecuteAsync(ActivateRequest req, CancellationToken c)
+    public override async Task HandleAsync(ActivateRequest req, CancellationToken c)
     {
-        var account = await onboardUserProfileService.OnboardUserProfile(
-            req.AccountId,
+        var accountId = await activationSessionStore.FindAccountIdAsync(req.ActivationSessionId, c);
+
+        if(accountId == Guid.Empty)
+        {
+            await Send.ErrorsAsync(401);
+            AddError("Activation session not found");
+            return;
+        }
+
+        var result = await onboardUserProfileService.OnboardUserProfile(
+            accountId,
             req.FirstName,
             req.LastName,
             req.ZipCode,
@@ -44,14 +53,20 @@ internal class Activate(IOnboardUserProfileService onboardUserProfileService) : 
             req.UserType
         );
 
-        if (account is null)
+        if (result is Err<AccountModel, Error> err)
         {
-            await Send.ErrorsAsync(500);
-            AddError("ユーザー情報の登録に失敗しました");
-            return TypedResults.InternalServerError();
+            await Send.ErrorsAsync(err.Value.StatusCode);
+            AddError(err.Value.Message, err.Value.ErrorCode);
+            return;
         }
 
-        return TypedResults.Created("/auth/activate", new ActivateResponse(account));
+        await activationSessionStore.DeleteAsync(req.ActivationSessionId, c);
+
+        await Send.CreatedAtAsync(
+            $"/user/profile",
+            responseBody: new ActivateResponse(result.Unwrap()),
+            cancellation: c
+        );
     }
 }
 
@@ -65,22 +80,23 @@ internal record ActivateRequest(
     UserType UserType)
 {
     [FromClaim]
-    public Guid AccountId {get; set;}
+    public string ActivationSessionId {get; set;} = string.Empty;
 }
 
 internal class ActivateValidator : Validator<ActivateRequest>
 {
     public ActivateValidator()
     {
-        RuleFor(x => x.AccountId)
-            .NotEmpty()
-            .Must(x => x.Version == 7);
+        RuleFor(x => x.ActivationSessionId)
+            .NotEmpty();
 
         RuleFor(x => x.FirstName)
-            .NotEmpty();
+            .NotEmpty()
+            .MaximumLength(50);
 
         RuleFor(x => x.LastName)
-            .NotEmpty();
+            .NotEmpty()
+            .MaximumLength(50);
 
         RuleFor(x => x.ZipCode)
             .Length(7);
@@ -89,9 +105,11 @@ internal class ActivateValidator : Validator<ActivateRequest>
             .NotEmpty();
 
         RuleFor(x => x.PhoneNumber)
-            .NotEmpty();
+            .NotEmpty()
+            .MaximumLength(15);
 
-        RuleFor(x => x.FaxNumber);
+        RuleFor(x => x.FaxNumber)
+            .MaximumLength(15);
         
         RuleFor(x => x.UserType)
             .IsInEnum();

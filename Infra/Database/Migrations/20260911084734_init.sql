@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "public"."accounts" (
        account_status IN (
          'just_created',
        'pending_email_verification', -- メールアドレス確認待ち
-       'onboarding', -- オンボーディング中(プロフィール入力待ち)
+       'on_boarding', -- オンボーディング中(プロフィール入力待ち)
        'activated', -- 有効化済み
        'suspended' -- 停止中
    )), -- アカウントの状態

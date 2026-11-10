@@ -1,4 +1,5 @@
 using BusReservationService.Redis.Authentication;
+using BusReservationService.Stores.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,9 @@ public static class DependencyInjection
         services.AddSingleton<
             IPostConfigureOptions<CookieAuthenticationOptions>,
             ConfigureCookieSessionStore>();
+
+        services.AddOptions<ActivationSessionOptions>();
+        services.AddSingleton<IActivationSessionStore,ActivationSessionStore>();
 
         return services;
     }
