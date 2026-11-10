@@ -40,6 +40,15 @@ public interface IReservationRepository
     Task<ReservationEntity[]> FindByParkingLotIdAsync(Guid parkingLotId);
 
     /// <summary>
+    /// 駐車場IDの、指定した時間の間駐車予定の予約の一覧を取得する
+    /// </summary>
+    /// <param name="parkingLotId">駐車場ID</param>
+    /// <param name="from">区間の開始時刻</param>
+    /// <param name="to">区間の終了時刻</param>
+    /// <returns>条件に一致する予約一覧</returns>
+    Task<ReservationEntity[]> FindOverlappingByParkingLotIdAsync(Guid parkingLotId, DateTime from, DateTime to);
+
+    /// <summary>
     /// 予約IDが存在するかどうかを確認する
     /// </summary>
     /// <param name="reservationId">予約ID</param>
