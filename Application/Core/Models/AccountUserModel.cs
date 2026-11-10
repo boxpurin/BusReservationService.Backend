@@ -10,12 +10,12 @@ public class AccountUserModel
     public byte[] PasswordHash { get; set; } = [];
     public byte[] PasswordSalt { get; set; } = [];
     
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
-    public string PhoneNumber { get; set; } = null!;
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? PhoneNumber { get; set; }
     public AccountRole AccountRole { get; set; }
     public AccountStatus AccountStatus { get; set; }
-    public UserType UserType { get; set; }
+    public UserType? UserType { get; set; }
 
     public AccountUserModel()
     {}
