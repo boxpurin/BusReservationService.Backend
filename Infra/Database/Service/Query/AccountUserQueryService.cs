@@ -20,7 +20,7 @@ public class AccountUserQueryService(IDbConnection DbConnection)
         string sql = """
         SELECT a.id AS "AccountId", a.email, a.password_hash, a.password_salt, u.first_name, u.last_name, u.phone_number, a.account_role, a.account_status, u.user_type
         FROM public.accounts AS a
-        INNER JOIN public.users AS u
+        LEFT JOIN public.users AS u
         ON a.id = u.account_id
         WHERE a.id = @AccountId
         """;
@@ -40,7 +40,7 @@ public class AccountUserQueryService(IDbConnection DbConnection)
         string sql = """
         SELECT a.id AS "AccountId" , a.email, a.password_hash, a.password_salt, u.first_name, u.last_name, u.phone_number, a.account_role, a.account_status, u.user_type
         FROM public.accounts AS a
-        INNER JOIN public.users AS u
+        LEFT JOIN public.users AS u
         ON a.id = u.account_id
         WHERE a.email = @Email
         """;
