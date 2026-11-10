@@ -8,12 +8,12 @@ namespace BusReservationService.Models;
 public record SessionValue(
     Guid AccountId, 
     string Email, 
-    string FirstName, 
-    string LastName,
-    string PhoneNumber,
+    string? FirstName, 
+    string? LastName,
+    string? PhoneNumber,
     AccountStatus Status,
     AccountRole Role,
-    UserType UserType
+    UserType? UserType
 )
 {
     public SessionValue(AccountUserModel accountUserModel)
@@ -31,7 +31,7 @@ public record SessionValue(
     public SessionValue(AccountEntity accountEntity, UserEntity userEntity)
     : this (
         accountEntity.Id,
-        accountEntity.Email, 
+        accountEntity.Email,
         userEntity.FirstName,
         userEntity.LastName,
         userEntity.PhoneNumber,
