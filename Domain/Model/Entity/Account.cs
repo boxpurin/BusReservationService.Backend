@@ -39,6 +39,28 @@ public class AccountEntity
                 AccountStatus.JustCreated
             );
     }
+    static public AccountEntity CreateAdminRoleAccount(string email, byte[] passwordHash, byte[] salt)
+    {
+        return new AccountEntity
+            (
+                Guid.CreateVersion7(),
+                email,
+                passwordHash,
+                salt,
+                AccountRole.Admin,
+                AccountStatus.JustCreated
+            );
+    }
+
+    public void WaitForEmailVerification()
+    {
+        AccountStatus = AccountStatus.PendingEmailVerify;
+    }
+
+    public void WaitForOnboard()
+    {
+        AccountStatus = AccountStatus.OnBoarding;
+    }
 
     public void Activate()
     {
