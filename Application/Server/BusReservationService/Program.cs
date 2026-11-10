@@ -27,6 +27,7 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 // Domain Repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IParkingLotRepository, ParkingLotRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 
