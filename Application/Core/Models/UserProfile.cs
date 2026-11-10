@@ -11,7 +11,7 @@ public class UserProfile
     public string LastName { get; set; } = string.Empty;
     public AccountRole Role { get; set; } = default!;
     public AccountStatus Status { get; set; } = default!;
-    public UserType UserType { get; set; } = default!;
+    public UserType? UserType { get; set; }
     public UserProfile(){}
     
     public UserProfile(AccountEntity account, UserEntity user)
