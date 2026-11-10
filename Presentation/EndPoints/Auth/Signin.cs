@@ -5,6 +5,7 @@ using BusReservationService.Models;
 using BusReservationService.Services.Interface;
 using BusReservationService.Share;
 using BusReservationService.Share.Utils.Error;
+using BusReservationService.Stores.Interface;
 using BusReservationService.Util;
 using FastEndpoints;
 using FastEndpoints.Security;
@@ -18,7 +19,7 @@ namespace BusReservationService.Endpoints.Auth;
 /// </summary>
 /// <param name="authAccountService">認証アカウントサービスのインスタンス</param>
 internal class Signin(
-    IAuthAccountService authAccountService) : Endpoint<SignInRequest, SignInResponse>
+    IAuthAccountService authAccountService, IActivationSessionStore activationSessionStore) : Endpoint<SignInRequest, SignInResponse>
 {
     public override void Configure()
     {
@@ -38,6 +39,28 @@ internal class Signin(
         }
 
         var accountUser = accountUserResult.Unwrap();
+
+        if (accountUser.AccountStatus is AccountStatus.OnBoarding)
+        {
+            var activationSession = await activationSessionStore.CreateAsync(accountUser.AccountId, c);
+
+            await CookieAuth.SignInAsync(u =>
+            {
+                u["ActivationSessionId"] = activationSession;
+                u.Roles.Add(accountUser.AccountRole.ToString());
+            });
+
+            await Send.OkAsync(new SignInResponse(
+                accountUser.Email,
+                accountUser.FirstName,
+                accountUser.LastName,
+                accountUser.AccountRole,
+                accountUser.AccountStatus,
+                accountUser.UserType
+            ));
+
+            return;
+        }
         await CookieAuth.SignInAsync(u =>
         {
             u["AccountId"] = accountUser.AccountId.ToString();
@@ -67,5 +90,5 @@ internal class SignInRequestValidator : Validator<SignInRequest>
     }
 }
 internal record SignInResponse(
-    string Email, string FirstName, string LastName, AccountRole Role, AccountStatus Status, UserType UserType
+    string Email, string? FirstName, string? LastName, AccountRole Role, AccountStatus Status, UserType? UserType
 );
