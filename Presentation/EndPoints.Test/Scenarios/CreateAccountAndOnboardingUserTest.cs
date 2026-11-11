@@ -51,6 +51,8 @@ public class CreateAccountAndOnboardingUserTest(MyApp App) : TestBase
         );
 
         activateMsg.StatusCode.ShouldBe(System.Net.HttpStatusCode.Created);
+        activateMsg.Headers.Location.ShouldNotBeNull();
+        activateMsg.Headers.Location!.ToString().ShouldBe("/user/profile");
 
 
         var signInReq = new SignInRequest(
