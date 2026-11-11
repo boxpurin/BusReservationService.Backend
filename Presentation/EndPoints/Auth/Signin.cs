@@ -61,10 +61,15 @@ internal class Signin(
 
             return;
         }
-        await CookieAuth.SignInAsync(u =>
+        await CookieAuth.SignInAsync( (u) =>
         {
             u["AccountId"] = accountUser.AccountId.ToString();
             u.Roles.Add(accountUser.AccountRole.ToString());
+        }, (p) =>
+        {
+            p.AllowRefresh = true;
+            p.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30);
+            p.IsPersistent = true;
         });
 
         await Send.OkAsync(new SignInResponse(
