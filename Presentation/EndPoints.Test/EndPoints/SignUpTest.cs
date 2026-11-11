@@ -45,8 +45,8 @@ public class SignUpTest(MyApp App) : TestBase
         signUpMsg.StatusCode.ShouldBe(System.Net.HttpStatusCode.Created);
 
         res.Account.Email.ShouldBe(req.Email);
-        res.Account.AccountRole.ShouldBe(Domain.ValueObject.AccountRole.AccountRole.Guest);
-        res.Account.AccountStatus.ShouldBe(Domain.ValueObject.AccountStatus.AccountStatus.JustCreated);
+        res.Account.AccountRole.ShouldBe(Domain.ValueObject.AccountRole.AccountRole.User);
+        res.Account.AccountStatus.ShouldBe(Domain.ValueObject.AccountStatus.AccountStatus.OnBoarding);
         res.Account.ActivatedAt.ShouldBeNull();
     }
 
