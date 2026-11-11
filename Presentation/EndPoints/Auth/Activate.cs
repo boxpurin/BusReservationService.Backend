@@ -62,8 +62,7 @@ internal class Activate(
 
         await activationSessionStore.DeleteAsync(req.ActivationSessionId, c);
 
-        await Send.CreatedAtAsync(
-            $"/user/profile",
+        await Send.CreatedAtAsync<User.GetUserProfile>(
             responseBody: new ActivateResponse(result.Unwrap()),
             cancellation: c
         );
