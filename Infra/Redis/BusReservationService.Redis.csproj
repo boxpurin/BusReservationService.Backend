@@ -13,6 +13,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="../../Application/Core/BusReservationService.Application.Core.csproj" />
     <ProjectReference Include="../../Domain/BusReservationService.Domain.csproj" />
     <ProjectReference Include="../../Share/Utils/BusReservationService.Utils.csproj" />
   </ItemGroup>

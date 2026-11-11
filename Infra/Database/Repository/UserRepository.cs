@@ -12,11 +12,10 @@ namespace BusReservationService.Database.Repository;
 
 public class UserRepository(IDbConnection connection) : IConnection, IUserRepository
 {
-    public async Task<UserEntity> AddAsymc(AddAsymcDto dto)
+    public async Task<UserEntity> AddAsync(AddAsyncDto dto)
     {
         EnsureConnectionOpen(connection);
 
-        using var tx = connection.BeginTransaction();
         const string sql = """
                 INSERT INTO users 
                 (account_id, first_name, last_name, zip_code, street_address, phone_number, fax_number, user_type)
@@ -24,8 +23,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
                 RETURNING *;
             """;
 
-        var userTable = await connection.QueryFirstAsync<UserTable>(sql, dto, tx);        
-        tx.Commit();
+        var userTable = await connection.QueryFirstAsync<UserTable>(sql, dto);
 
         return UserEntity.
             CreateUserEntity(
@@ -43,7 +41,6 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
     {
         EnsureConnectionOpen(connection);
 
-        using var tx = connection.BeginTransaction();
         const string sql = """
                 UPDATE users
                 SET 
@@ -60,7 +57,6 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
             """;
 
         var userTable = await connection.QueryFirstAsync<UserTable>(sql, entity);
-        tx.Commit();
 
         return userTable.ToDomain();
     }
@@ -104,10 +100,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
     {
         EnsureConnectionOpen(connection);
         
-        using var tx = connection.BeginTransaction();
         var ret = await connection.ExecuteAsync("DELETE FROM users WHERE account_id = @AccountId", new { AccountId = accountId });
-
-        tx.Commit();
 
         return ret == 1;
     }
