@@ -43,6 +43,8 @@ public class SignUpTest(MyApp App) : TestBase
 
 
         signUpMsg.StatusCode.ShouldBe(System.Net.HttpStatusCode.Created);
+        signUpMsg.Headers.Location.ShouldNotBeNull();
+        signUpMsg.Headers.Location!.ToString().ShouldBe("/user/profile");
 
         res.Account.Email.ShouldBe(req.Email);
         res.Account.AccountRole.ShouldBe(Domain.ValueObject.AccountRole.AccountRole.User);
@@ -61,6 +63,7 @@ public class SignUpTest(MyApp App) : TestBase
         );
 
         rsp.StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
+        rsp.Headers.Location.ShouldBeNull();
         res.ShouldBeNull();
     }
     
@@ -75,6 +78,7 @@ public class SignUpTest(MyApp App) : TestBase
         );
 
         rsp.StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
+        rsp.Headers.Location.ShouldBeNull();
         res.ShouldBeNull();
     }
 
@@ -94,5 +98,6 @@ public class SignUpTest(MyApp App) : TestBase
         );
 
         rsp.StatusCode.ShouldBe(System.Net.HttpStatusCode.Conflict);
+        rsp.Headers.Location.ShouldBeNull();
     }
 }
