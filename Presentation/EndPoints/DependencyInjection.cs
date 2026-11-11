@@ -13,7 +13,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services
-        .AddAuthenticationCookie(validFor: TimeSpan.FromMinutes(3), options: options =>
+        .AddAuthenticationCookie(validFor: TimeSpan.FromMinutes(15), options: options =>
         {
             options.Cookie.Name = "__Host-BusReservationService.SessionId";
         }) //configure cookie auth
