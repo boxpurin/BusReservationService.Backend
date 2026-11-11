@@ -18,8 +18,9 @@ public class AccountModel
     {
         Id = entity.Id;
         Email = entity.Email;
-        AccountRole = AccountRole;
-        AccountStatus = AccountStatus;
+        AccountRole = entity.AccountRole;
+        AccountStatus = entity.AccountStatus;
         LastLoginAt = entity.LastLoginAt;
+        ActivatedAt = entity.ActivatedAt;
     }
 }
