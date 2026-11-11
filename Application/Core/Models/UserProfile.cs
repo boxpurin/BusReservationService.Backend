@@ -7,8 +7,8 @@ using BusReservationService.Models;
 public class UserProfile
 {
     public string Email { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public AccountRole Role { get; set; } = default!;
     public AccountStatus Status { get; set; } = default!;
     public UserType? UserType { get; set; }
