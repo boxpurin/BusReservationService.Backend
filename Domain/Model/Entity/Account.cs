@@ -52,16 +52,6 @@ public class AccountEntity
             );
     }
 
-    public void WaitForEmailVerification()
-    {
-        AccountStatus = AccountStatus.PendingEmailVerify;
-    }
-
-    public void WaitForOnboard()
-    {
-        AccountStatus = AccountStatus.OnBoarding;
-    }
-
     /// <summary>
     /// アカウントステータスをメール確認待ちに設定する
     /// </summary>
