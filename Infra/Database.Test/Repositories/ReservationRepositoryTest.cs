@@ -205,7 +205,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             table.OutgoingDateTime.AddHours(-6),
             ReservationStatus.Canceled,
             table.BusCampanyName,
-            DateTime.Now
+            DateTime.UtcNow
         );
 
         var updated = await reservationRepository.UpdateAsync(expect);
@@ -321,6 +321,76 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         // 適当な存在しないIDを流す
         var notExist = await reservationRepository.FindByParkingLotIdAsync(_notExistAccount.Id);
         notExist.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task FindOverlappingByParkingLotIdAsyncTest()
+    {
+        using var conn = await CreateConnectionAsync();
+        IReservationRepository reservationRepository = new ReservationRepository(conn);
+
+        var otherParkingLot = ParkingLotEntity.CreateNewParkingLotEntity(
+            "Other Test駐車場", "7654321",
+            Prefecture.Tokyo, "東京都千代田区2-2-2",
+            "06-4321-4321", null, 20, 10, false, true
+        );
+
+        await conn.ExecuteAsync(
+            """
+            INSERT INTO parking_lots(
+                id, display_name, prefecture_id, zip_code, street_address, phone_number, fax_number,
+                max_capacity, reservation_capacity, is_allows_boarding_alighting, is_active
+            )
+            VALUES (
+                @Id, @ParkingLotName, @Prefecture, @ZipCode, @StreetAddress, @PhoneNumber, @FaxNumber,
+                @MaxCapacity, @ReservationCapacity, @IsAllowsBoardingAlighting, @IsActive
+            );
+            """,
+            otherParkingLot
+        );
+
+        var from = new DateTime(2026, 1, 1, 10, 0, 0, DateTimeKind.Utc);
+        var to = from.AddHours(1);
+        var reservations = new[]
+        {
+            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddMinutes(-30), from.AddMinutes(30), "Before overlap"),
+            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddMinutes(15), from.AddMinutes(45), "Inside overlap"),
+            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddHours(-1), to.AddHours(1), "Contains interval"),
+            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddHours(-1), from, "Ends at start"),
+            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, to, to.AddHours(1), "Starts at end"),
+            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddMinutes(20), from.AddMinutes(40), "Canceled"),
+            ReservationEntity.CreateNewReservation(_existAccount.Id, otherParkingLot.Id, from.AddMinutes(20), from.AddMinutes(40), "Other parking lot"),
+        };
+        reservations[5].Cancel();
+
+        await conn.ExecuteAsync(
+            """
+            INSERT INTO reservations (
+                id, account_id, parking_lot_id, incoming_datetime, outgoing_datetime,
+                reservation_status, bus_campany_name, canceled_at
+            )
+            VALUES (
+                @Id, @AccountId, @ParkingLotId, @IncomingDateTime, @OutGoingDateTime,
+                @ReservationStatus, @BusCampanyName, @CanceledAt
+            );
+            """,
+            reservations
+        );
+
+        var overlaps = await reservationRepository.FindOverlappingByParkingLotIdAsync(
+            _existParkingLot.Id,
+            from,
+            to
+        );
+
+        overlaps.Length.ShouldBe(3);
+        overlaps.Select(x => x.Id).ShouldContain(reservations[0].Id);
+        overlaps.Select(x => x.Id).ShouldContain(reservations[1].Id);
+        overlaps.Select(x => x.Id).ShouldContain(reservations[2].Id);
+        overlaps.Select(x => x.Id).ShouldNotContain(reservations[3].Id);
+        overlaps.Select(x => x.Id).ShouldNotContain(reservations[4].Id);
+        overlaps.Select(x => x.Id).ShouldNotContain(reservations[5].Id);
+        overlaps.Select(x => x.Id).ShouldNotContain(reservations[6].Id);
     }
 
     [Fact]
