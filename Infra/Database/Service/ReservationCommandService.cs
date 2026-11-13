@@ -95,9 +95,9 @@ public class ReservationCommandService(
 
             var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
 
-            var overlaps = await reservationRepository.FindOverlappingByParkingLotIdAsync(
+            var overlaps = (await reservationRepository.FindOverlappingByParkingLotIdAsync(
                 reservation.ParkingLotId, IncomingDate, OutgoingDate
-            );
+            )).Where(r => r.Id != reservationId).ToArray();
             
             if (!CanReserve(parkingLot, overlaps, IncomingDate, OutgoingDate))
             {
