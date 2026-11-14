@@ -12,7 +12,7 @@ public class UpdateReservationRequestValidatorTestR
     private readonly UpdateReservationRequestValidator _validator = new ();
 
     [Fact]
-    public void Expected_Create_Reservation_Request()
+    public void Expected_Update_Reservation_Request()
     {
         var request = new UpdateReservationRequest(
             Guid.NewGuid(),
