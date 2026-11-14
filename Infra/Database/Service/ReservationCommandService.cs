@@ -212,18 +212,18 @@ public class ReservationCommandService(
             return false;
         }
 
-        while( from < to )
-        {
-            var overlappingReservations = overlaps.Where(r => 
-                r.IncomingDateTime < to && r.OutgoingDateTime > from
-            );
+        var at = from;
 
-            if( overlappingReservations.Count() >= parkingLot.ReservationCapacity )
+        while( at < to )
+        {
+            if( overlaps.Count(r =>
+                    r.IncomingDateTime <= at && at < r.OutgoingDateTime
+                ) >= parkingLot.ReservationCapacity )
             {
                 return false;
             }
 
-            from = from.AddMinutes(15);
+            at = at.AddMinutes(15);
         }
 
         return true;
