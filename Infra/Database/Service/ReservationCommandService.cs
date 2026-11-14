@@ -42,6 +42,17 @@ public class ReservationCommandService(
         {
             // lock the target parking lot for update to prevent concurrent reservations
             var parkingLot = await LockParkingLotAsync(parkingLotId, tx);
+            if (parkingLot == null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error {
+                        Message = "Parking lot not found.",
+                        ErrorCode = "PARKING_LOT_NOT_FOUND",
+                        StatusCode = 404 }
+                );
+            }
+
             var overlaps = await reservationRepository.FindOverlappingByParkingLotIdAsync(
                 parkingLotId, IncomingDate, OutgoingDate
             );
@@ -103,6 +114,14 @@ public class ReservationCommandService(
         try
         {
             var reservation = await LockReservationAsync(reservationId, tx);
+            if (reservation == null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error { Message = "Reservation not found.", ErrorCode = "RESERVATION_NOT_FOUND", StatusCode = 404 }
+                );
+            }
+
             if (reservation.AccountId != accountId)
             {
                 tx.Rollback();
@@ -116,6 +135,16 @@ public class ReservationCommandService(
             }
 
             var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
+            if (parkingLot == null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error {
+                        Message = "Parking lot not found.",
+                        ErrorCode = "PARKING_LOT_NOT_FOUND",
+                        StatusCode = 404 }
+                );
+            }
 
             var overlaps = (await reservationRepository.FindOverlappingByParkingLotIdAsync(
                 reservation.ParkingLotId, IncomingDate, OutgoingDate
@@ -163,7 +192,15 @@ public class ReservationCommandService(
         try
         {
             var reservation = await LockReservationAsync(reservationId, tx);
-            if (reservation is null || reservation.AccountId != accountId)
+            if (reservation is null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error { Message = "Reservation not found.", ErrorCode = "RESERVATION_NOT_FOUND", StatusCode = 404 }
+                );
+            }
+
+            if (reservation.AccountId != accountId)
             {
                 tx.Rollback();
                 return new Err<ReservationEntity, Error>(
@@ -172,6 +209,16 @@ public class ReservationCommandService(
             }
 
             var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
+            if (parkingLot is null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error {
+                        Message = "Parking lot not found.",
+                        ErrorCode = "PARKING_LOT_NOT_FOUND",
+                        StatusCode = 404 }
+                );
+            }
 
             var entity = ReservationEntity.FromSnapshot(
                 reservation.Id,
@@ -251,25 +298,17 @@ public class ReservationCommandService(
         return true;
     }
 
-    private async Task<ReservationTable> LockReservationAsync(Guid reservationId, IDbTransaction transaction)
+    private async Task<ReservationTable?> LockReservationAsync(Guid reservationId, IDbTransaction transaction)
     {
         var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";
         var reservation = await conn.QuerySingleOrDefaultAsync<ReservationTable>(sql, new { ReservationId = reservationId }, transaction);
-        if (reservation == null)
-        {
-            throw new InvalidOperationException($"Reservation with ID {reservationId} not found.");
-        }
         return reservation;
     }
 
-    private async Task<ParkingLotTable> LockParkingLotAsync(Guid parkingLotId, IDbTransaction transaction)
+    private async Task<ParkingLotTable?> LockParkingLotAsync(Guid parkingLotId, IDbTransaction transaction)
     {
         var sql = "SELECT * FROM parking_lots WHERE id = @ParkingLotId FOR UPDATE";
         var parkingLot = await conn.QuerySingleOrDefaultAsync<ParkingLotTable>(sql, new { ParkingLotId = parkingLotId }, transaction);
-        if (parkingLot == null)
-        {
-            throw new InvalidOperationException($"Parking lot with ID {parkingLotId} not found.");
-        }
         return parkingLot;
     }
     
