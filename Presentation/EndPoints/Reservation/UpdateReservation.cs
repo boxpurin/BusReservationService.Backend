@@ -4,6 +4,7 @@ using BusReservationService.Services.Interface;
 using BusReservationService.Share;
 using BusReservationService.Share.Utils.Error;
 using FastEndpoints;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BusReservationService.Endpoints.Reservation;
@@ -49,4 +50,17 @@ internal record UpdateReservationRequest(
     [FromRoute]
     public Guid Id { get; set; }
 }
+
+internal class UpdateReservationRequestValidator : Validator<UpdateReservationRequest>
+{
+    public UpdateReservationRequestValidator()
+    {
+        RuleFor(x => x.ParkingLotId).NotEmpty();
+        RuleFor(x => x.IncomingDateTime).
+            LessThan(x => x.OutgoingDateTime).
+            WithMessage("IncomingDateTime must be less than OutgoingDateTime");
+        RuleFor(x => x.BusCampanyName).NotEmpty();
+    }
+}
+
 internal record UpdateReservationResponse();
