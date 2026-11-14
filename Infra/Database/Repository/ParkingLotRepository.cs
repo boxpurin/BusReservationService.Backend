@@ -140,7 +140,7 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
             WHERE id = @Id; 
         """;
 
-        var row = await connection.ExecuteAsync(
+        var row = await connection.ExecuteScalarAsync<int>(
             sql, new { Id = parkingLotId }
         );
 
@@ -155,7 +155,7 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
             WHERE prefecture_id = @Id; 
         """;
 
-        var row = await connection.ExecuteAsync(
+        var row = await connection.ExecuteScalarAsync<int>(
             sql, new { Id = prefecture }
         );
 
