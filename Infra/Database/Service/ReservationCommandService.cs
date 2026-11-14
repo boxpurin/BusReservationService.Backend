@@ -24,6 +24,17 @@ public class ReservationCommandService(
         string BusCompany
     )
     {
+        if (IncomingDate >= OutgoingDate)
+        {
+            return new Err<ReservationEntity, Error>(
+                new Error {
+                    Message = "Incoming date must be before outgoing date.",
+                    ErrorCode = "INVALID_DATE_RANGE",
+                    StatusCode = 400
+                }
+            );
+        }
+
         EnsureConnectionOpen(conn);
         using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
 
@@ -75,6 +86,17 @@ public class ReservationCommandService(
         string BusCompany
     )
     {
+        if (IncomingDate >= OutgoingDate)
+        {
+            return new Err<ReservationEntity, Error>(
+                new Error {
+                    Message = "Incoming date must be before outgoing date.",
+                    ErrorCode = "INVALID_DATE_RANGE",
+                    StatusCode = 400
+                }
+            );
+        }
+    
         EnsureConnectionOpen(conn);
         using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
 
