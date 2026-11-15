@@ -21,8 +21,8 @@ public static class AccountStatusExteinsion
 
     public static bool IsSuspend(this AccountStatus status) => status is AccountStatus.Suspended;
 
-    public static void WaitVerifing(this AccountStatus status) => status = AccountStatus.PendingEmailVerify;
+    public static void WaitVerifing(this ref AccountStatus status) => status = AccountStatus.PendingEmailVerify;
 
-    public static void Verified(this AccountStatus status) => status = AccountStatus.OnBoarding;
-    public static void Activate(this AccountStatus status) => status = AccountStatus.Activated;
+    public static void Verified(this ref AccountStatus status) => status = AccountStatus.OnBoarding;
+    public static void Activate(this ref AccountStatus status) => status = AccountStatus.Activated;
 }
