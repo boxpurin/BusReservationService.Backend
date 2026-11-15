@@ -38,8 +38,7 @@ internal class Signup(
             u.Roles.Add("User");
         });
 
-        await Send.CreatedAtAsync(
-            $"/user/profile",
+        await Send.CreatedAtAsync<User.GetUserProfile>(
             responseBody: new SignupResponse(account),
             cancellation: c
         );

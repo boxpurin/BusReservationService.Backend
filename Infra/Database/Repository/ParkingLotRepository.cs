@@ -60,6 +60,8 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
         prefecture_id = @Prefecture, 
         zip_code = @ZipCode, 
         street_address = @StreetAddress, 
+        phone_number = @PhoneNumber, 
+        fax_number = @FaxNumber, 
         max_capacity = @MaxCapacity,
         reservation_capacity = @ReservationCapacity,
         is_allows_boarding_alighting = @IsAllowsBoardingAlighting, 
@@ -140,7 +142,7 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
             WHERE id = @Id; 
         """;
 
-        var row = await connection.ExecuteAsync(
+        var row = await connection.ExecuteScalarAsync<int>(
             sql, new { Id = parkingLotId }
         );
 
@@ -155,7 +157,7 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
             WHERE prefecture_id = @Id; 
         """;
 
-        var row = await connection.ExecuteAsync(
+        var row = await connection.ExecuteScalarAsync<int>(
             sql, new { Id = prefecture }
         );
 

@@ -83,6 +83,6 @@ public class ReservationEntity
     public void Cancel()
     {
         ReservationStatus = ReservationStatus.Canceled;
-        CanceledAt = DateTime.Now;
+        CanceledAt = DateTime.UtcNow;
     }
 }

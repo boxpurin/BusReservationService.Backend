@@ -205,7 +205,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             table.OutgoingDateTime.AddHours(-6),
             ReservationStatus.Canceled,
             table.BusCampanyName,
-            DateTime.Now
+            DateTime.UtcNow
         );
 
         var updated = await reservationRepository.UpdateAsync(expect);

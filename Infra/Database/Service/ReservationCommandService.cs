@@ -24,6 +24,17 @@ public class ReservationCommandService(
         string BusCompany
     )
     {
+        if (IncomingDate >= OutgoingDate)
+        {
+            return new Err<ReservationEntity, Error>(
+                new Error {
+                    Message = "Incoming date must be before outgoing date.",
+                    ErrorCode = "INVALID_DATE_RANGE",
+                    StatusCode = 400
+                }
+            );
+        }
+
         EnsureConnectionOpen(conn);
         using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
 
@@ -31,6 +42,17 @@ public class ReservationCommandService(
         {
             // lock the target parking lot for update to prevent concurrent reservations
             var parkingLot = await LockParkingLotAsync(parkingLotId, tx);
+            if (parkingLot == null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error {
+                        Message = "Parking lot not found.",
+                        ErrorCode = "PARKING_LOT_NOT_FOUND",
+                        StatusCode = 404 }
+                );
+            }
+
             var overlaps = await reservationRepository.FindOverlappingByParkingLotIdAsync(
                 parkingLotId, IncomingDate, OutgoingDate
             );
@@ -70,17 +92,37 @@ public class ReservationCommandService(
     public async Task<ApplicationResult<ReservationEntity, Error>> UpdateReservationAsync(
         Guid accountId,
         Guid reservationId,
+        Guid updatedToParkingLotId,
         DateTime IncomingDate,
         DateTime OutgoingDate,
         string BusCompany
     )
     {
+        if (IncomingDate >= OutgoingDate)
+        {
+            return new Err<ReservationEntity, Error>(
+                new Error {
+                    Message = "Incoming date must be before outgoing date.",
+                    ErrorCode = "INVALID_DATE_RANGE",
+                    StatusCode = 400
+                }
+            );
+        }
+    
         EnsureConnectionOpen(conn);
         using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
 
         try
         {
             var reservation = await LockReservationAsync(reservationId, tx);
+            if (reservation == null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error { Message = "Reservation not found.", ErrorCode = "RESERVATION_NOT_FOUND", StatusCode = 404 }
+                );
+            }
+
             if (reservation.AccountId != accountId)
             {
                 tx.Rollback();
@@ -93,13 +135,35 @@ public class ReservationCommandService(
                     
             }
 
-            var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
+            var parkingLotIds = new[] { reservation.ParkingLotId, updatedToParkingLotId }
+                .Distinct()
+                .OrderBy(id => id);
 
-            var overlaps = await reservationRepository.FindOverlappingByParkingLotIdAsync(
-                reservation.ParkingLotId, IncomingDate, OutgoingDate
-            );
-            
-            if (!CanReserve(parkingLot, overlaps, IncomingDate, OutgoingDate))
+            var lockedParkingLots = new Dictionary<Guid, ParkingLotTable>();
+
+            foreach (var id in parkingLotIds)
+            {
+                var idLocked = await LockParkingLotAsync(id, tx);
+                if (idLocked == null)
+                {
+                    tx.Rollback();
+                    return new Err<ReservationEntity, Error>(
+                        new Error {
+                            Message = "Parking lot not found.",
+                            ErrorCode = "PARKING_LOT_NOT_FOUND",
+                            StatusCode = 404 }
+                    );
+                }
+                lockedParkingLots.Add(id, idLocked);
+            }
+
+            var targetParkingLot = lockedParkingLots[updatedToParkingLotId];
+
+            var overlaps = (await reservationRepository.FindOverlappingByParkingLotIdAsync(
+                targetParkingLot.Id, IncomingDate, OutgoingDate
+            )).Where(r => r.Id != reservationId).ToArray();
+
+            if (!CanReserve(targetParkingLot, overlaps, IncomingDate, OutgoingDate))
             {
                 tx.Rollback();
                 return new Err<ReservationEntity, Error>(
@@ -113,7 +177,7 @@ public class ReservationCommandService(
             var entity = ReservationEntity.FromSnapshot(
                 reservation.Id,
                 accountId,
-                reservation.ParkingLotId,
+                targetParkingLot.Id,
                 IncomingDate,
                 OutgoingDate,
                 reservation.ReservationStatus.ToDomain(),
@@ -141,7 +205,15 @@ public class ReservationCommandService(
         try
         {
             var reservation = await LockReservationAsync(reservationId, tx);
-            if (reservation is null || reservation.AccountId != accountId)
+            if (reservation is null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error { Message = "Reservation not found.", ErrorCode = "RESERVATION_NOT_FOUND", StatusCode = 404 }
+                );
+            }
+
+            if (reservation.AccountId != accountId)
             {
                 tx.Rollback();
                 return new Err<ReservationEntity, Error>(
@@ -150,6 +222,16 @@ public class ReservationCommandService(
             }
 
             var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
+            if (parkingLot is null)
+            {
+                tx.Rollback();
+                return new Err<ReservationEntity, Error>(
+                    new Error {
+                        Message = "Parking lot not found.",
+                        ErrorCode = "PARKING_LOT_NOT_FOUND",
+                        StatusCode = 404 }
+                );
+            }
 
             var entity = ReservationEntity.FromSnapshot(
                 reservation.Id,
@@ -212,42 +294,34 @@ public class ReservationCommandService(
             return false;
         }
 
-        while( from < to )
-        {
-            var overlappingReservations = overlaps.Where(r => 
-                r.IncomingDateTime < to && r.OutgoingDateTime > from
-            );
+        var at = from;
 
-            if( overlappingReservations.Count() >= parkingLot.ReservationCapacity )
+        while( at < to )
+        {
+            if( overlaps.Count(r =>
+                    r.IncomingDateTime <= at && at < r.OutgoingDateTime
+                ) >= parkingLot.ReservationCapacity )
             {
                 return false;
             }
 
-            from = from.AddMinutes(15);
+            at = at.AddMinutes(15);
         }
 
         return true;
     }
 
-    private async Task<ReservationTable> LockReservationAsync(Guid reservationId, IDbTransaction transaction)
+    private async Task<ReservationTable?> LockReservationAsync(Guid reservationId, IDbTransaction transaction)
     {
-        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";
+        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";    
         var reservation = await conn.QuerySingleOrDefaultAsync<ReservationTable>(sql, new { ReservationId = reservationId }, transaction);
-        if (reservation == null)
-        {
-            throw new InvalidOperationException($"Reservation with ID {reservationId} not found.");
-        }
         return reservation;
     }
 
-    private async Task<ParkingLotTable> LockParkingLotAsync(Guid parkingLotId, IDbTransaction transaction)
+    private async Task<ParkingLotTable?> LockParkingLotAsync(Guid parkingLotId, IDbTransaction transaction)
     {
         var sql = "SELECT * FROM parking_lots WHERE id = @ParkingLotId FOR UPDATE";
         var parkingLot = await conn.QuerySingleOrDefaultAsync<ParkingLotTable>(sql, new { ParkingLotId = parkingLotId }, transaction);
-        if (parkingLot == null)
-        {
-            throw new InvalidOperationException($"Parking lot with ID {parkingLotId} not found.");
-        }
         return parkingLot;
     }
     

@@ -37,8 +37,8 @@ internal class Activate(
 
         if(accountId == Guid.Empty)
         {
+            AddError("Activation session not found", "InvalidSession");
             await Send.ErrorsAsync(401);
-            AddError("Activation session not found");
             return;
         }
 
@@ -55,15 +55,14 @@ internal class Activate(
 
         if (result is Err<AccountModel, Error> err)
         {
-            await Send.ErrorsAsync(err.Value.StatusCode);
             AddError(err.Value.Message, err.Value.ErrorCode);
+            await Send.ErrorsAsync(err.Value.StatusCode);
             return;
         }
 
         await activationSessionStore.DeleteAsync(req.ActivationSessionId, c);
 
-        await Send.CreatedAtAsync(
-            $"/user/profile",
+        await Send.CreatedAtAsync<User.GetUserProfile>(
             responseBody: new ActivateResponse(result.Unwrap()),
             cancellation: c
         );
