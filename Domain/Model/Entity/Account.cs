@@ -39,6 +39,18 @@ public class AccountEntity
                 AccountStatus.JustCreated
             );
     }
+    static public AccountEntity CreateAdminRoleAccount(string email, byte[] passwordHash, byte[] salt)
+    {
+        return new AccountEntity
+            (
+                Guid.CreateVersion7(),
+                email,
+                passwordHash,
+                salt,
+                AccountRole.Admin,
+                AccountStatus.JustCreated
+            );
+    }
 
     /// <summary>
     /// アカウントステータスをメール確認待ちに設定する

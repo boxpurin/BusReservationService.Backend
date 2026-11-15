@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SU-GrantTool/SU-GrantTool.csproj" />
+  <Project Path="../Domain/BusReservationService.Domain.csproj" />
+  <Project Path="../Infra/Database/BusReservationService.Database.csproj" />
+  <Project Path="../Share/Utils/BusReservationService.Utils.csproj" />
+</Solution>
