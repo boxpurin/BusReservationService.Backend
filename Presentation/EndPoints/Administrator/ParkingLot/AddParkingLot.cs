@@ -2,7 +2,6 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.AccountRole;
 using BusReservationService.Domain.ValueObject.Prefecture;
 using BusReservationService.Domain.ValueObject.UserType;
-using BusReservationService.Endpoints.ParkingLots;
 using BusReservationService.Models;
 using BusReservationService.Services.Interface;
 using FastEndpoints;
@@ -54,10 +53,9 @@ internal class AddParkingLot(IAccountRepository accountRepository, IParkingLotRe
 
         var lot = await parkingLotRepository.AddAsync(dto);
 
-        await Send.CreatedAtAsync<GetParkingLot>(
-            routeValues: new { Id = lot.Id },
-            new AddParkingLotResponse(
-                ParkingLotProfile.FromEntity(lot))
+        await Send.CreatedAtAsync($"api/parking-lot/{lot.Id}",
+        new AddParkingLotResponse(
+            ParkingLotProfile.FromEntity(lot))
         );
     }
 }
