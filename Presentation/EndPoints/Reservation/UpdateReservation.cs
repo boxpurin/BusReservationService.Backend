@@ -24,6 +24,7 @@ internal class UpdateReservation(IReservationCommandService reservationCommandSe
         var result = await reservationCommandService.UpdateReservationAsync(
             req.AccountId,
             req.Id,
+            req.ParkingLotId,
             req.IncomingDateTime,
             req.OutgoingDateTime,
             req.BusCampanyName);

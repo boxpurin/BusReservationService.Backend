@@ -92,6 +92,7 @@ public class ReservationCommandService(
     public async Task<ApplicationResult<ReservationEntity, Error>> UpdateReservationAsync(
         Guid accountId,
         Guid reservationId,
+        Guid updatedToParkingLotId,
         DateTime IncomingDate,
         DateTime OutgoingDate,
         string BusCompany
