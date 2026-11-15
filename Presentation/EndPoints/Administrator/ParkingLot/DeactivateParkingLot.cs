@@ -47,21 +47,9 @@ internal class DeactiveParkingLot(IAccountRepository accountRepository,IParkingL
             return;
         }
 
-        var update = ParkingLotEntity.FromSnapshot(
-            lot.Id,
-            lot.ParkingLotName,
-            lot.ZipCode,
-            lot.Prefecture,
-            lot.StreetAddress,
-            lot.PhoneNumber,
-            lot.FaxNumber,
-            lot.MaxCapacity,
-            lot.ReservationCapacity,
-            lot.IsAllowsBoardingAlighting,
-            false
-        );
-
-        var updated = await parkingLotRepository.UpdateAsync(update);
+        lot.Deactivate();
+        
+        var updated = await parkingLotRepository.UpdateAsync(lot);
 
         await Send.OkAsync(new DeactiveParkingLotResponse(
             ParkingLotProfile.FromEntity(updated))
