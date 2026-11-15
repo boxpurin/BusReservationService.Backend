@@ -17,6 +17,7 @@ public interface IReservationCommandService
     Task<ApplicationResult<ReservationEntity, Error>> UpdateReservationAsync(
         Guid accountId,
         Guid reservationId,
+        Guid updateToParkingLotId,
         DateTime IncomingDate,
         DateTime OutgoingDate,
         string BusCompany

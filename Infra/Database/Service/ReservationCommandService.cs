@@ -92,6 +92,7 @@ public class ReservationCommandService(
     public async Task<ApplicationResult<ReservationEntity, Error>> UpdateReservationAsync(
         Guid accountId,
         Guid reservationId,
+        Guid updatedToParkingLotId,
         DateTime IncomingDate,
         DateTime OutgoingDate,
         string BusCompany
@@ -134,23 +135,35 @@ public class ReservationCommandService(
                     
             }
 
-            var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
-            if (parkingLot == null)
+            var parkingLotIds = new[] { reservation.ParkingLotId, updatedToParkingLotId }
+                .Distinct()
+                .OrderBy(id => id);
+
+            var lockedParkingLots = new Dictionary<Guid, ParkingLotTable>();
+
+            foreach (var id in parkingLotIds)
             {
-                tx.Rollback();
-                return new Err<ReservationEntity, Error>(
-                    new Error {
-                        Message = "Parking lot not found.",
-                        ErrorCode = "PARKING_LOT_NOT_FOUND",
-                        StatusCode = 404 }
-                );
+                var idLocked = await LockParkingLotAsync(id, tx);
+                if (idLocked == null)
+                {
+                    tx.Rollback();
+                    return new Err<ReservationEntity, Error>(
+                        new Error {
+                            Message = "Parking lot not found.",
+                            ErrorCode = "PARKING_LOT_NOT_FOUND",
+                            StatusCode = 404 }
+                    );
+                }
+                lockedParkingLots.Add(id, idLocked);
             }
 
+            var targetParkingLot = lockedParkingLots[updatedToParkingLotId];
+
             var overlaps = (await reservationRepository.FindOverlappingByParkingLotIdAsync(
-                reservation.ParkingLotId, IncomingDate, OutgoingDate
+                targetParkingLot.Id, IncomingDate, OutgoingDate
             )).Where(r => r.Id != reservationId).ToArray();
-            
-            if (!CanReserve(parkingLot, overlaps, IncomingDate, OutgoingDate))
+
+            if (!CanReserve(targetParkingLot, overlaps, IncomingDate, OutgoingDate))
             {
                 tx.Rollback();
                 return new Err<ReservationEntity, Error>(
@@ -164,7 +177,7 @@ public class ReservationCommandService(
             var entity = ReservationEntity.FromSnapshot(
                 reservation.Id,
                 accountId,
-                reservation.ParkingLotId,
+                targetParkingLot.Id,
                 IncomingDate,
                 OutgoingDate,
                 reservation.ReservationStatus.ToDomain(),
@@ -300,7 +313,7 @@ public class ReservationCommandService(
 
     private async Task<ReservationTable?> LockReservationAsync(Guid reservationId, IDbTransaction transaction)
     {
-        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";
+        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";    
         var reservation = await conn.QuerySingleOrDefaultAsync<ReservationTable>(sql, new { ReservationId = reservationId }, transaction);
         return reservation;
     }
