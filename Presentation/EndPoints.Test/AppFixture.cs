@@ -14,7 +14,7 @@ namespace BusReservationService.Endpoints.Test;
 
 public class MyApp : AppFixture<ApiMarker>
 {
-    PostgreSqlContainer _dbContainer =  new PostgreSqlBuilder("postgres:16-alpine")
+    PostgreSqlContainer _dbContainer =  new PostgreSqlBuilder("postgres:18-alpine")
         .WithDatabase("TestDb")
         .WithUsername("postgres")
         .WithPassword("password123")

@@ -94,11 +94,12 @@ internal class UpdateParkingLotValidator : Validator<UpdateParkingLotRequest>
     {
         RuleFor(x => x.AccountId.Version).Equal(7);
         RuleFor(x => x.ParkingLotName).NotEmpty();
+        RuleFor(x => x.Prefecture).IsInEnum();
         RuleFor(x => x.ZipCode).Length(7);
         RuleFor(x => x.StreetAddress).NotEmpty();
         RuleFor(x => x.PhoneNumber).NotEmpty();
-        RuleFor(x => x.MaxCapacity).NotEmpty();
-        RuleFor(x => x.ReservationCapacity).NotEmpty();
+        RuleFor(x => (int)x.MaxCapacity).GreaterThan(0);
+        RuleFor(x => x.ReservationCapacity).LessThan(x => x.MaxCapacity);
     }
 }
 internal record UpdateParkingLotResponse(ParkingLotProfile? ParkingLot);

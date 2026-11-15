@@ -169,13 +169,13 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
         EnsureConnectionOpen(connection);
 
         var sql = """
-        DELETE FROM parking_lots WHERE parking_lot_id = @Id
+        DELETE FROM parking_lots WHERE id = @Id
         """;
 
         var tx = connection.BeginTransaction();
 
         var ret = await connection.ExecuteAsync(sql, new { id = parkingLotId }, tx);
-
+    
         tx.Commit();
 
         return ret == 1;
