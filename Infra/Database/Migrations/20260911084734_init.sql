@@ -4,7 +4,7 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 -- Tables
 CREATE TABLE IF NOT EXISTS "public"."accounts" (
-   "id" "uuid" PRIMARY KEY default "gen_random_uuid"(), -- アカウントID（データベース用）
+   "id" "uuid" PRIMARY KEY default "uuidv4"(), -- アカウントID（データベース用）
    "email" "text" UNIQUE NOT NULL, -- メールアドレス（ログインID）
    "password_hash" "bytea" NOT NULL, -- パスワードハッシュ
    "password_salt" "bytea" NOT NULL, -- パスワードソルト
@@ -79,7 +79,7 @@ COMMENT ON TABLE "public"."prefectures" IS '都道府県情報 (JIS X 0401)';
 
 
 CREATE TABLE IF NOT EXISTS "public"."parking_lots" (
-   "id" "uuid" PRIMARY KEY default "gen_random_uuid"(),
+   "id" "uuid" PRIMARY KEY default "uuidv7"(),
    "display_name" "text" NOT NULL,
    "prefecture_id" smallint NOT null,
    constraint fk_prefecture FOREIGN key ("prefecture_id")
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS "public"."parking_lots" (
 );
 COMMENT ON TABLE "public"."parking_lots" IS '駐車場情報';
 CREATE TABLE IF NOT EXISTS "public"."reservations" (
-   "id" "uuid" PRIMARY KEY default "gen_random_uuid"(),
+   "id" "uuid" PRIMARY KEY default "uuidv7"(),
   
    "account_id" "uuid" NOT null,
    constraint fk_account FOREIGN KEY ("account_id")

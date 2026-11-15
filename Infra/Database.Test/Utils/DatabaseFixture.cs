@@ -6,7 +6,7 @@ namespace BusReservationService.Database.Test.Utils;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    public PostgreSqlContainer DbContainer { get; } = new PostgreSqlBuilder("postgres:16-alpine")
+    public PostgreSqlContainer DbContainer { get; } = new PostgreSqlBuilder("postgres:18-alpine")
     .WithDatabase("test_db")
     .WithUsername("postgres")
     .WithPassword("password")
