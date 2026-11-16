@@ -44,6 +44,8 @@ builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
 
 // Reservation Command Service
 builder.Services.AddScoped<IReservationCommandService, ReservationCommandService>();
+builder.Services.AddScoped<IParkingLotCommandService, ParkingLotCommandService>();
+
 
 builder.Services.AddPresentationEndpoints(builder.Configuration);
 
