@@ -10,6 +10,7 @@ using FastEndpoints;
 using System.Data;
 using BusReservationService.Infra.Database.Service.Query;
 using BusReservationService.Infra.Database.Service;
+using Application.Core.Services.Interface.Administrator;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +47,8 @@ builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
 builder.Services.AddScoped<IReservationCommandService, ReservationCommandService>();
 builder.Services.AddScoped<IParkingLotCommandService, ParkingLotCommandService>();
 
+// Administrator Reservation Command Service
+builder.Services.AddScoped<IAdministratorReservationCommandService, AdministratorReservationCommandService>();
 
 builder.Services.AddPresentationEndpoints(builder.Configuration);
 
