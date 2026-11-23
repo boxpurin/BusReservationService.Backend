@@ -1,5 +1,6 @@
 ﻿using BusReservationService.Database.Enums;
 using BusReservationService.Domain.Entity;
+using BusReservationService.Domain.ValueObject.Unit;
 using BusReservationService.Share;
 
 namespace BusReservationService.Database.Table;
@@ -7,6 +8,7 @@ namespace BusReservationService.Database.Table;
 internal class ReservationTable : IConvertibleToDomain<ReservationEntity>
 {
     public Guid Id { get; set; }
+    public ReservationNumberUnit ReservationNumber { get; set; }
     public Guid AccountId { get; set; }
     public Guid ParkingLotId { get; set; }
     public DateTime IncomingDateTime { get; set; }
@@ -22,6 +24,7 @@ internal class ReservationTable : IConvertibleToDomain<ReservationEntity>
         return ReservationEntity
         .FromSnapshot(
             Id,
+            ReservationNumber,
             AccountId,
             ParkingLotId,
             IncomingDateTime,

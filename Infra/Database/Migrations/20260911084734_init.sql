@@ -100,6 +100,8 @@ CREATE TABLE IF NOT EXISTS "public"."parking_lots" (
 COMMENT ON TABLE "public"."parking_lots" IS '駐車場情報';
 CREATE TABLE IF NOT EXISTS "public"."reservations" (
    "id" "uuid" PRIMARY KEY default "uuidv7"(),
+
+   "reservation_number" "text" NOT NULL,
   
    "account_id" "uuid" NOT null,
    constraint fk_account FOREIGN KEY ("account_id")
