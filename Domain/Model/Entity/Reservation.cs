@@ -1,10 +1,12 @@
 ﻿using BusReservationService.Domain.ValueObject.ReservationStatus;
+using BusReservationService.Domain.ValueObject.Unit;
 
 namespace BusReservationService.Domain.Entity;
 
 public class ReservationEntity
 {
     public Guid Id { get; private set; }
+    public ReservationNumberUnit ReservationNumber { get; private set; }
     public Guid AccountId { get; private set; }
     public Guid ParkingLotId { get; private set; }
     public DateTime IncomingDateTime { get; private set; }
@@ -15,6 +17,7 @@ public class ReservationEntity
 
     private ReservationEntity(
         Guid id,
+        ReservationNumberUnit reservationNumber,
         Guid accountId,
         Guid parkingLotId,
         DateTime inComingDateTime,
@@ -25,6 +28,7 @@ public class ReservationEntity
     )
     {
         Id = id;
+        ReservationNumber = reservationNumber;
         AccountId = accountId;
         ParkingLotId = parkingLotId;
         IncomingDateTime = inComingDateTime;
@@ -35,6 +39,7 @@ public class ReservationEntity
     }
 
     public static ReservationEntity CreateNewReservation(
+        ReservationNumberUnit reservationNumber,
         Guid accountId,
         Guid parkingLotId,
         DateTime inComingDateTime,
@@ -43,6 +48,7 @@ public class ReservationEntity
     {
         return new ReservationEntity(
             Guid.CreateVersion7(),
+            reservationNumber,
             accountId,
             parkingLotId,
             inComingDateTime,
@@ -55,6 +61,7 @@ public class ReservationEntity
     
     public static ReservationEntity FromSnapshot(
         Guid id,
+        ReservationNumberUnit reservationNumber,
         Guid accountId,
         Guid parkingLotId,
         DateTime inComingDateTime,
@@ -65,6 +72,7 @@ public class ReservationEntity
     {
         return new ReservationEntity(
             id,
+            reservationNumber,
             accountId,
             parkingLotId,
             inComingDateTime,

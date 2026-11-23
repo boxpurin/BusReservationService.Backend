@@ -16,14 +16,14 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
         var sql = """
             INSERT INTO reservations ( 
-            id, account_id, parking_lot_id,
+            id, reservation_number, account_id, parking_lot_id,
             incoming_datetime, outgoing_datetime, 
             reservation_status, bus_campany_name, canceled_at
             ) VALUES 
-            (@Id, @AccountId, @ParkingLotId, 
+            (@Id, @ReservationNumber, @AccountId, @ParkingLotId, 
             @IncomingDateTime, @OutGoingDateTime, 
             @ReservationStatus, @BusCampanyName, 
-            @CanceledAt) 
+            @CanceledAt)
             RETURNING * ;
         """;
 

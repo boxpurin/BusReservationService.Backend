@@ -11,6 +11,9 @@ using System.Data;
 using BusReservationService.Infra.Database.Service.Query;
 using BusReservationService.Infra.Database.Service;
 using Application.Core.Services.Interface.Administrator;
+using BusReservationService;
+using BusReservationService.Infra.Database;
+using BusReservationService.Domain.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +27,8 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 
     return factory.CreateConnection();
 });
+builder.Services.AddScoped<DbSession>(sp => new DbSession(sp.GetRequiredService<IDbConnection>()));
+builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<DbSession>());
 
 // Domain Repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -34,6 +39,9 @@ builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 // Session Management Service
 builder.Services.AddServiceSessionStore(builder.Configuration);
+
+// Domain Services
+builder.Services.AddScoped<IReservationNumberGenerator, ReservationNumberGenerator>();
 
 // Application Service
 builder.Services.AddScoped<IOnboardUserProfileService, OnboardUserProfileService>();

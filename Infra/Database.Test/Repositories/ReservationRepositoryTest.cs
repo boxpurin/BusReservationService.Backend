@@ -13,6 +13,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
+using Infra.Database.Test.Utils;
 
 namespace BusReservationService.Database.Test.Repositories;
 
@@ -59,6 +60,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         ArrangeReservations = new[] {
         ReservationEntity.CreateNewReservation
         (
+            ReservationNumberUtil.Create(1),
             _existAccount.Id,
             _existParkingLot.Id,
             inComing,
@@ -67,6 +69,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         ), 
         ReservationEntity.CreateNewReservation
         (
+            ReservationNumberUtil.Create(2),
             _existAccount.Id,
             _existParkingLot.Id,
             inComing,
@@ -156,6 +159,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
         expected = ReservationEntity.CreateNewReservation
         (
+            ReservationNumberUtil.Create(3),
             _notExistAccount.Id,
             _existParkingLot.Id,
             expected.IncomingDateTime,
@@ -185,11 +189,11 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var table = await conn.QueryFirstAsync<ReservationTable>(
             """
             INSERT INTO reservations ( 
-            id, account_id, parking_lot_id,
+            id, reservation_number, account_id, parking_lot_id,
             incoming_datetime, outgoing_datetime, 
             reservation_status, bus_campany_name, canceled_at
             ) VALUES 
-            (@Id, @AccountId, @ParkingLotId, 
+            (@Id, @ReservationNumber, @AccountId, @ParkingLotId, 
             @IncomingDateTime, @OutGoingDateTime, 
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) 
@@ -199,6 +203,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
         var expect = ReservationEntity.FromSnapshot(
             table.Id,
+            table.ReservationNumber,
             table.AccountId,
             table.ParkingLotId,
             table.IncomingDateTime,
@@ -236,11 +241,11 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var table = await conn.QueryFirstAsync<ReservationTable>(
             """
             INSERT INTO reservations ( 
-            id, account_id, parking_lot_id,
+            id, reservation_number, account_id, parking_lot_id,
             incoming_datetime, outgoing_datetime, 
             reservation_status, bus_campany_name, canceled_at
             ) VALUES 
-            (@Id, @AccountId, @ParkingLotId, 
+            (@Id, @ReservationNumber, @AccountId, @ParkingLotId, 
             @IncomingDateTime, @OutGoingDateTime, 
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) 
@@ -272,11 +277,11 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var tables = await conn.ExecuteAsync(
             """
             INSERT INTO reservations ( 
-            id, account_id, parking_lot_id,
+            id, reservation_number, account_id, parking_lot_id,
             incoming_datetime, outgoing_datetime, 
             reservation_status, bus_campany_name, canceled_at
             ) VALUES 
-            (@Id, @AccountId, @ParkingLotId, 
+            (@Id, @ReservationNumber, @AccountId, @ParkingLotId, 
             @IncomingDateTime, @OutGoingDateTime, 
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) ;
@@ -303,11 +308,11 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var tables = await conn.ExecuteAsync(
             """
             INSERT INTO reservations ( 
-            id, account_id, parking_lot_id,
+            id, reservation_number, account_id, parking_lot_id,
             incoming_datetime, outgoing_datetime, 
             reservation_status, bus_campany_name, canceled_at
             ) VALUES 
-            (@Id, @AccountId, @ParkingLotId, 
+            (@Id, @ReservationNumber, @AccountId, @ParkingLotId, 
             @IncomingDateTime, @OutGoingDateTime, 
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) ;
@@ -353,24 +358,24 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var to = from.AddHours(1);
         var reservations = new[]
         {
-            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddMinutes(-30), from.AddMinutes(30), "Before overlap"),
-            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddMinutes(15), from.AddMinutes(45), "Inside overlap"),
-            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddHours(-1), to.AddHours(1), "Contains interval"),
-            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddHours(-1), from, "Ends at start"),
-            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, to, to.AddHours(1), "Starts at end"),
-            ReservationEntity.CreateNewReservation(_existAccount.Id, _existParkingLot.Id, from.AddMinutes(20), from.AddMinutes(40), "Canceled"),
-            ReservationEntity.CreateNewReservation(_existAccount.Id, otherParkingLot.Id, from.AddMinutes(20), from.AddMinutes(40), "Other parking lot"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(1),_existAccount.Id, _existParkingLot.Id, from.AddMinutes(-30), from.AddMinutes(30), "Before overlap"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(2), _existAccount.Id, _existParkingLot.Id, from.AddMinutes(15), from.AddMinutes(45), "Inside overlap"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(3), _existAccount.Id, _existParkingLot.Id, from.AddHours(-1), to.AddHours(1), "Contains interval"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(4), _existAccount.Id, _existParkingLot.Id, from.AddHours(-1), from, "Ends at start"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(5), _existAccount.Id, _existParkingLot.Id, to, to.AddHours(1), "Starts at end"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(6), _existAccount.Id, _existParkingLot.Id, from.AddMinutes(20), from.AddMinutes(40), "Canceled"),
+            ReservationEntity.CreateNewReservation(ReservationNumberUtil.Create(7), _existAccount.Id, otherParkingLot.Id, from.AddMinutes(20), from.AddMinutes(40), "Other parking lot"),
         };
         reservations[5].Cancel();
 
         await conn.ExecuteAsync(
             """
             INSERT INTO reservations (
-                id, account_id, parking_lot_id, incoming_datetime, outgoing_datetime,
+                id, reservation_number, account_id, parking_lot_id, incoming_datetime, outgoing_datetime,
                 reservation_status, bus_campany_name, canceled_at
             )
             VALUES (
-                @Id, @AccountId, @ParkingLotId, @IncomingDateTime, @OutGoingDateTime,
+                @Id, @ReservationNumber, @AccountId, @ParkingLotId, @IncomingDateTime, @OutGoingDateTime,
                 @ReservationStatus, @BusCampanyName, @CanceledAt
             );
             """,
@@ -404,11 +409,11 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         var tables = await conn.ExecuteAsync(
             """
             INSERT INTO reservations ( 
-            id, account_id, parking_lot_id,
+            id, reservation_number, account_id, parking_lot_id,
             incoming_datetime, outgoing_datetime, 
             reservation_status, bus_campany_name, canceled_at
             ) VALUES 
-            (@Id, @AccountId, @ParkingLotId, 
+            (@Id, @ReservationNumber, @AccountId, @ParkingLotId, 
             @IncomingDateTime, @OutGoingDateTime, 
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) ;

@@ -4,6 +4,9 @@ using BusReservationService.Database.Interface;
 using BusReservationService.Database.Table;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
+using BusReservationService.Domain.Service;
+using BusReservationService.Domain.ValueObject.Unit;
+using BusReservationService.Infra.Database;
 using BusReservationService.Services.Interface;
 using BusReservationService.Share;
 using BusReservationService.Share.Utils.Error;
@@ -13,8 +16,9 @@ using Dapper;
 namespace BusReservationService.Database.Service;
 
 public class ReservationCommandService(
-    IDbConnection conn,
-    IReservationRepository reservationRepository) : IConnection , IReservationCommandService
+    DbSession session,
+    IReservationNumberGenerator reservationNumberGenerator,
+    IReservationRepository reservationRepository) : IReservationCommandService
 {
     public async Task<ApplicationResult<ReservationEntity, Error>> CreateReservationAsync(
         Guid accountId,
@@ -35,16 +39,15 @@ public class ReservationCommandService(
             );
         }
 
-        EnsureConnectionOpen(conn);
-        using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
+        await session.BeginAsync(IsolationLevel.ReadCommitted);
 
         try
         {
             // lock the target parking lot for update to prevent concurrent reservations
-            var parkingLot = await LockParkingLotAsync(parkingLotId, tx);
+            var parkingLot = await LockParkingLotAsync(parkingLotId);
             if (parkingLot == null)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error {
                         Message = "Parking lot not found.",
@@ -59,7 +62,7 @@ public class ReservationCommandService(
             
             if (!CanReserve(parkingLot, overlaps, IncomingDate, OutgoingDate))
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error {
                         Message = "Cannot reserve the parking lot.",
@@ -68,7 +71,12 @@ public class ReservationCommandService(
                 );
             }
 
+            var reservationNumber = await reservationNumberGenerator.GenerateAsync(
+                parkingLotId, DateOnly.FromDateTime(IncomingDate)
+            );
+
             var entity = ReservationEntity.CreateNewReservation(
+                reservationNumber,
                 accountId,
                 parkingLotId,
                 IncomingDate,
@@ -78,13 +86,13 @@ public class ReservationCommandService(
 
             entity.Confirm();
             var reservation = await reservationRepository.AddAsync(entity);
-            tx.Commit();
+            await session.CommitAsync();
 
             return new Ok<ReservationEntity, Error>(reservation);
         }
         catch (Exception)
         {
-            tx.Rollback();
+            await session.RollbackAsync();
             throw;
         }
     }
@@ -109,15 +117,14 @@ public class ReservationCommandService(
             );
         }
     
-        EnsureConnectionOpen(conn);
-        using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
+        await session.BeginAsync(IsolationLevel.ReadCommitted);
 
         try
         {
-            var reservation = await LockReservationAsync(reservationId, tx);
+            var reservation = await LockReservationAsync(reservationId);
             if (reservation == null)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error { Message = "Reservation not found.", ErrorCode = "RESERVATION_NOT_FOUND", StatusCode = 404 }
                 );
@@ -125,7 +132,7 @@ public class ReservationCommandService(
 
             if (reservation.AccountId != accountId)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error {
                     Message = "Unauthorized to update this reservation.",
@@ -143,10 +150,10 @@ public class ReservationCommandService(
 
             foreach (var id in parkingLotIds)
             {
-                var idLocked = await LockParkingLotAsync(id, tx);
+                var idLocked = await LockParkingLotAsync(id);
                 if (idLocked == null)
                 {
-                    tx.Rollback();
+                    await session.RollbackAsync();
                     return new Err<ReservationEntity, Error>(
                         new Error {
                             Message = "Parking lot not found.",
@@ -165,7 +172,7 @@ public class ReservationCommandService(
 
             if (!CanReserve(targetParkingLot, overlaps, IncomingDate, OutgoingDate))
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error {
                         Message = "Cannot reserve the parking lot.",
@@ -176,6 +183,7 @@ public class ReservationCommandService(
 
             var entity = ReservationEntity.FromSnapshot(
                 reservation.Id,
+                reservation.ReservationNumber,
                 accountId,
                 targetParkingLot.Id,
                 IncomingDate,
@@ -186,28 +194,27 @@ public class ReservationCommandService(
             );
 
             var updated = await reservationRepository.UpdateAsync(entity);
-            tx.Commit();
+            await session.CommitAsync();
     
             return new Ok<ReservationEntity, Error>(updated);
         }
         catch (Exception)
         {
-            tx.Rollback();
+            await session.RollbackAsync();
             throw;
         }
     }
 
     public async Task<ApplicationResult<ReservationEntity, Error>> CancelReservationAsync(Guid accountId, Guid reservationId)
     {
-        EnsureConnectionOpen(conn);
-        using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
+        await session.BeginAsync(IsolationLevel.ReadCommitted);
 
         try
         {
-            var reservation = await LockReservationAsync(reservationId, tx);
+            var reservation = await LockReservationAsync(reservationId);
             if (reservation is null)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error { Message = "Reservation not found.", ErrorCode = "RESERVATION_NOT_FOUND", StatusCode = 404 }
                 );
@@ -215,16 +222,16 @@ public class ReservationCommandService(
 
             if (reservation.AccountId != accountId)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error { Message = "Unauthorized to cancel this reservation.", ErrorCode = "UNAUTHORIZED", StatusCode = 403 }
                 );
             }
 
-            var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId, tx);
+            var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId);
             if (parkingLot is null)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<ReservationEntity, Error>(
                     new Error {
                         Message = "Parking lot not found.",
@@ -235,6 +242,7 @@ public class ReservationCommandService(
 
             var entity = ReservationEntity.FromSnapshot(
                 reservation.Id,
+                reservation.ReservationNumber,
                 accountId,
                 reservation.ParkingLotId,
                 reservation.IncomingDateTime,
@@ -245,13 +253,13 @@ public class ReservationCommandService(
             );
 
             var updated = await reservationRepository.UpdateAsync(entity);
-            tx.Commit();
+            await session.CommitAsync();
 
             return new Ok<ReservationEntity, Error>(updated);
         }
         catch(Exception)
         {
-            tx.Rollback();
+            await session.RollbackAsync();
             throw;
         }
     }
@@ -262,26 +270,26 @@ public class ReservationCommandService(
         DateTime incomingDateTime,
         DateTime outgoingDateTime,
         string busCompany,
-        IDbTransaction transaction
+        ReservationNumberUnit reservationNumber
     )
     {
         var sql = @"
-            INSERT INTO reservations (account_id, parking_lot_id, incoming_datetime, outgoing_datetime, bus_company)
-            VALUES (@AccountId, @ParkingLotId, @IncomingDateTime, @OutgoingDateTime, @BusCompany)
+            INSERT INTO reservations (reservation_number, account_id, parking_lot_id, incoming_datetime, outgoing_datetime, bus_company)
+            VALUES (@ReservationNumber, @AccountId, @ParkingLotId, @IncomingDateTime, @OutgoingDateTime, @BusCompany)
             RETURNING *;
         ";
 
-        var reservation = await conn.QuerySingleAsync<ReservationTable>(
+        var reservation = await session.Connection.QuerySingleAsync<ReservationTable>(
             sql,
             new
             {
+                ReservationNumber = await reservationNumberGenerator.GenerateAsync(parkingLotId, DateOnly.FromDateTime(incomingDateTime)),
                 AccountId = accountId,
                 ParkingLotId = parkingLotId,
                 IncomingDateTime = incomingDateTime,
                 OutgoingDateTime = outgoingDateTime,
                 BusCompany = busCompany
-            },
-            transaction
+            }
         );
 
         return reservation;
@@ -311,17 +319,17 @@ public class ReservationCommandService(
         return true;
     }
 
-    private async Task<ReservationTable?> LockReservationAsync(Guid reservationId, IDbTransaction transaction)
+    private async Task<ReservationTable?> LockReservationAsync(Guid reservationId)
     {
-        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";    
-        var reservation = await conn.QuerySingleOrDefaultAsync<ReservationTable>(sql, new { ReservationId = reservationId }, transaction);
+        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";
+        var reservation = await session.Connection.QuerySingleOrDefaultAsync<ReservationTable>(sql, new { ReservationId = reservationId }, session.Transaction);
         return reservation;
     }
 
-    private async Task<ParkingLotTable?> LockParkingLotAsync(Guid parkingLotId, IDbTransaction transaction)
+    private async Task<ParkingLotTable?> LockParkingLotAsync(Guid parkingLotId)
     {
         var sql = "SELECT * FROM parking_lots WHERE id = @ParkingLotId FOR UPDATE";
-        var parkingLot = await conn.QuerySingleOrDefaultAsync<ParkingLotTable>(sql, new { ParkingLotId = parkingLotId }, transaction);
+        var parkingLot = await session.Connection.QuerySingleOrDefaultAsync<ParkingLotTable>(sql, new { ParkingLotId = parkingLotId }, session.Transaction);
         return parkingLot;
     }
     
