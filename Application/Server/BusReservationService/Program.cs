@@ -24,6 +24,8 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 
     return factory.CreateConnection();
 });
+builder.Services.AddScoped<DbSession>(sp => new DbSession(sp.GetRequiredService<IDbConnection>()));
+builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<DbSession>());
 
 // Domain Repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
