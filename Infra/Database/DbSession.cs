@@ -14,7 +14,7 @@ public sealed class DbSession : IConnection, IUnitOfWork, IDisposable
     public IDbConnection Connection { get; }
     public IDbTransaction? Transaction { get; private set; }
 
-    public async Task BeginAsync(IsolationLevel? isolationLevel)
+    public async Task BeginAsync(IsolationLevel? isolationLevel = null)
     {
         EnsureConnectionOpen(Connection);
 
