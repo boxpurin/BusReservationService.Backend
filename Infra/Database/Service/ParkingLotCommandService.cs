@@ -6,12 +6,13 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Share;
 using BusReservationService.Share.Utils.Error;
 using BusReservationService.Infra.Database;
+using BusReservationService;
 
 public class ParkingLotCommandService(
-    DbSession session,
+    IUnitOfWork session,
     IParkingLotRepository parkingLotRepository,
     IReservationRepository reservationRepository)
-    : IConnection, IParkingLotCommandService
+    : IParkingLotCommandService
 {
     public async Task<ApplicationResult<int, Error>> CountAvailableReservationSpace(Guid parkingLotId, DateTime datetime)
         {

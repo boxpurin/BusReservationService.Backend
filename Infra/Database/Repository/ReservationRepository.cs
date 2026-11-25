@@ -97,7 +97,23 @@ public class ReservationRepository(IDbContext context) : IDbContext, IReservatio
         SELECT * FROM reservations WHERE id = @ReservationId
         """;
 
-        var row = await connection.QuerySingleOrDefaultAsync<ReservationTable>(
+        var row = await context.Connection.QuerySingleOrDefaultAsync<ReservationTable>(
+            sql, new { ReservationId = reservationId }
+        );
+
+        return row?.ToDomain();
+    }
+
+    
+    public async Task<ReservationEntity?> FindByReservationIdForUpdateAsync(Guid reservationId)
+    {
+        context.EnsureConnectionOpen();
+
+        var sql = """
+        SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE;
+        """;
+
+        var row = await context.Connection.QuerySingleOrDefaultAsync<ReservationTable>(
             sql, new { ReservationId = reservationId }
         );
 

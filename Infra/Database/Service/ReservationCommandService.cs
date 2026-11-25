@@ -16,9 +16,10 @@ using Dapper;
 namespace BusReservationService.Database.Service;
 
 public class ReservationCommandService(
-    DbSession session,
+    IUnitOfWork session,
     IReservationNumberGenerator reservationNumberGenerator,
-    IReservationRepository reservationRepository) : IReservationCommandService
+    IReservationRepository reservationRepository,
+    IParkingLotRepository parkingLotRepository) : IReservationCommandService
 {
     public async Task<ApplicationResult<ReservationEntity, Error>> CreateReservationAsync(
         Guid accountId,
@@ -44,7 +45,7 @@ public class ReservationCommandService(
         try
         {
             // lock the target parking lot for update to prevent concurrent reservations
-            var parkingLot = await LockParkingLotAsync(parkingLotId);
+            var parkingLot = await parkingLotRepository.FindByParkingLotIdForUpdateAsync(parkingLotId);
             if (parkingLot == null)
             {
                 await session.RollbackAsync();
@@ -121,7 +122,7 @@ public class ReservationCommandService(
 
         try
         {
-            var reservation = await LockReservationAsync(reservationId);
+            var reservation = await reservationRepository.FindByReservationIdForUpdateAsync(reservationId);
             if (reservation == null)
             {
                 await session.RollbackAsync();
@@ -146,11 +147,11 @@ public class ReservationCommandService(
                 .Distinct()
                 .OrderBy(id => id);
 
-            var lockedParkingLots = new Dictionary<Guid, ParkingLotTable>();
+            var lockedParkingLots = new Dictionary<Guid, ParkingLotEntity>();
 
             foreach (var id in parkingLotIds)
             {
-                var idLocked = await LockParkingLotAsync(id);
+                var idLocked = await parkingLotRepository.FindByParkingLotIdForUpdateAsync(id);
                 if (idLocked == null)
                 {
                     await session.RollbackAsync();
@@ -188,7 +189,7 @@ public class ReservationCommandService(
                 targetParkingLot.Id,
                 IncomingDate,
                 OutgoingDate,
-                reservation.ReservationStatus.ToDomain(),
+                reservation.ReservationStatus,
                 BusCompany,
                 reservation.CanceledAt
             );
@@ -211,7 +212,7 @@ public class ReservationCommandService(
 
         try
         {
-            var reservation = await LockReservationAsync(reservationId);
+            var reservation = await reservationRepository.FindByReservationIdForUpdateAsync(reservationId);
             if (reservation is null)
             {
                 await session.RollbackAsync();
@@ -228,7 +229,7 @@ public class ReservationCommandService(
                 );
             }
 
-            var parkingLot = await LockParkingLotAsync(reservation.ParkingLotId);
+            var parkingLot = await  parkingLotRepository.FindByParkingLotIdForUpdateAsync(reservation.ParkingLotId);
             if (parkingLot is null)
             {
                 await session.RollbackAsync();
@@ -264,38 +265,7 @@ public class ReservationCommandService(
         }
     }
 
-    private async Task<ReservationTable> InsertReservationAsync(
-        Guid accountId,
-        Guid parkingLotId,
-        DateTime incomingDateTime,
-        DateTime outgoingDateTime,
-        string busCompany,
-        ReservationNumberUnit reservationNumber
-    )
-    {
-        var sql = @"
-            INSERT INTO reservations (reservation_number, account_id, parking_lot_id, incoming_datetime, outgoing_datetime, bus_company)
-            VALUES (@ReservationNumber, @AccountId, @ParkingLotId, @IncomingDateTime, @OutgoingDateTime, @BusCompany)
-            RETURNING *;
-        ";
-
-        var reservation = await session.Connection.QuerySingleAsync<ReservationTable>(
-            sql,
-            new
-            {
-                ReservationNumber = await reservationNumberGenerator.GenerateAsync(parkingLotId, DateOnly.FromDateTime(incomingDateTime)),
-                AccountId = accountId,
-                ParkingLotId = parkingLotId,
-                IncomingDateTime = incomingDateTime,
-                OutgoingDateTime = outgoingDateTime,
-                BusCompany = busCompany
-            }
-        );
-
-        return reservation;
-    }
-
-    private bool CanReserve(ParkingLotTable parkingLot, ReservationEntity[] overlaps,DateTime from, DateTime to)
+    private bool CanReserve(ParkingLotEntity parkingLot, ReservationEntity[] overlaps,DateTime from, DateTime to)
     {
         if( parkingLot.IsActive is not true )
         {
@@ -318,19 +288,4 @@ public class ReservationCommandService(
 
         return true;
     }
-
-    private async Task<ReservationTable?> LockReservationAsync(Guid reservationId)
-    {
-        var sql = "SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE";
-        var reservation = await session.Connection.QuerySingleOrDefaultAsync<ReservationTable>(sql, new { ReservationId = reservationId }, session.Transaction);
-        return reservation;
-    }
-
-    private async Task<ParkingLotTable?> LockParkingLotAsync(Guid parkingLotId)
-    {
-        var sql = "SELECT * FROM parking_lots WHERE id = @ParkingLotId FOR UPDATE";
-        var parkingLot = await session.Connection.QuerySingleOrDefaultAsync<ParkingLotTable>(sql, new { ParkingLotId = parkingLotId }, session.Transaction);
-        return parkingLot;
-    }
-    
 }

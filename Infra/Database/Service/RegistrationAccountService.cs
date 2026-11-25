@@ -13,13 +13,13 @@ using BusReservationService.Database.Interface;
 namespace BusReservationService.Infra.Database.Service;
 
 public class RegistrationAccountService(
-    DbSession session,
+    IUnitOfWork session,
     IAccountRepository accountRepository) : IRegistrationAccountService
 {
     public async Task<ApplicationResult<AccountModel, Error>> RegistrationAccountAsync(string email, string password)
     {
         await session.BeginAsync(IsolationLevel.ReadCommitted);
-        
+
         if(await accountRepository.IsExistByEmailAsync(email))
         {
             await session.RollbackAsync();
