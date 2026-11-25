@@ -1,8 +1,11 @@
 using System.Reflection.Metadata.Ecma335;
+using Application.Core.Services.Interface.Administrator;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.AccountRole;
 using BusReservationService.Models;
 using BusReservationService.Services.Interface;
+using BusReservationService.Share;
+using BusReservationService.Share.Utils.Error;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BusReservationService.Endpoints.Administrator.ParkingLots;
     
-internal class DeleteParkingLot(IAccountRepository accountRepository, IParkingLotRepository parkingLotRepository) : Endpoint<DeleteParkingLotRequest, DeleteParkingLotResponse>
+internal class DeleteParkingLot(IAdministratorReservationCommandService administratorReservationCommandService) : Endpoint<DeleteParkingLotRequest, DeleteParkingLotResponse>
 {
     public override void Configure()
     {
@@ -22,39 +25,22 @@ internal class DeleteParkingLot(IAccountRepository accountRepository, IParkingLo
 
     public override async Task HandleAsync(DeleteParkingLotRequest req, CancellationToken ct)
     {
-        
-        var account = await accountRepository.FindByAccountIdAsync(req.AccountId);
-        if( account is null )
+        var result = await administratorReservationCommandService.DeleteReservationAsync(req.AccountId, req.Id);
+        if(result is Err<int, Error> (var err))
         {
-            AddError("Account not found.");
-            await Send.NotFoundAsync();
-            return;
+            AddError(err.Message, err.ErrorCode);
+            await Send.ErrorsAsync(err.StatusCode);
+            return ;
         }
 
-        if( account.AccountRole != AccountRole.Admin )
-        {
-            AddError("Forbidden access. Admin role required.");
-            await Send.ForbiddenAsync();
-            return;
-        }
-
-        if(!await parkingLotRepository.ExistByParkingLotIdAsync(req.Id))
-        {
-            AddError("Parking lot not found.");
-            await Send.NotFoundAsync();
-            return;
-        }
-
-        await parkingLotRepository.DeleteAsync(req.Id);
         await Send.NoContentAsync();
-        return;
     }
 }
 
 
 internal record DeleteParkingLotRequest()
 {
-    [FromRoute]
+    [RouteParam]
     public Guid Id {get; init;}
 
     [FromClaim]
