@@ -7,27 +7,19 @@ using BusReservationService.Domain.Repository;
 using BusReservationService.Domain.ValueObject.AccountRole;
 using BusReservationService.Share;
 using BusReservationService.Share.Utils.Error;
+using BusReservationService.Infra.Database;
+using BusReservationService;
 
-public class AdministratorReservationCommandService : IConnection, IAdministratorReservationCommandService
+public class AdministratorReservationCommandService(
+    IReservationRepository reservationRepository,
+    IAccountRepository accountRoleRepository,
+    IUnitOfWork unit) : IAdministratorReservationCommandService
 {
-    private readonly IAccountRepository accountRoleRepository;
-    private readonly IReservationRepository reservationRepository;
-    private readonly IDbConnection conn;
-
-    public AdministratorReservationCommandService(
-        IReservationRepository reservationRepository,
-        IAccountRepository accountRoleRepository,
-        IDbConnection connection)
-    {
-        this.reservationRepository = reservationRepository;
-        this.accountRoleRepository = accountRoleRepository;
-        this.conn = connection;
-    }
 
     public async Task<ApplicationResult<int, Error>> DeleteReservationAsync(Guid adminAccountId, Guid reservationId)
     {
-        EnsureConnectionOpen(conn);
 
+        await unit.BeginAsync();
         var adminAccount = await accountRoleRepository.FindByAccountIdAsync(adminAccountId);
 
         if (adminAccount is null)
@@ -48,15 +40,13 @@ public class AdministratorReservationCommandService : IConnection, IAdministrato
             );
         }
 
-        using var tx = conn.BeginTransaction();
-
         try
         {
-            var lockedReservation = await LockReservationAsync(reservationId);
+            var lockedReservation = await reservationRepository.FindByReservationIdForUpdateAsync(reservationId);
 
             if (lockedReservation is null)
             {
-                tx.Rollback();
+                await unit.RollbackAsync();
                 return new Err<int, Error>(new Error{
                     Message = "Reservation not found",
                     ErrorCode = "RESERVATION_NOT_FOUND",
@@ -66,25 +56,14 @@ public class AdministratorReservationCommandService : IConnection, IAdministrato
 
             var result = await reservationRepository.DeleteByReservationIdAsync(lockedReservation.Id);
 
-            tx.Commit();
+            await unit.CommitAsync();
 
             return new Ok<int, Error>(result ? 1 : 0);
         }
         catch
         {
-            tx.Rollback();
+            await unit.RollbackAsync();
             throw;
         }
-    }
-
-    private async Task<ReservationTable?> LockReservationAsync(Guid reservationId)
-    {
-        var sql = "SELECT * FROM Reservation WHERE Id = @ReservationId FOR UPDATE";
-
-        var reservation = await conn.QuerySingleOrDefaultAsync<ReservationTable>(
-            sql, new { ReservationId = reservationId }
-        );
-
-        return reservation;
     }
 }

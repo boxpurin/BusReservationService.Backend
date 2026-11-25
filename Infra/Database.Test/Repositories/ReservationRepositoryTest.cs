@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 using Infra.Database.Test.Utils;
+using BusReservationService.Infra.Database;
 
 namespace BusReservationService.Database.Test.Repositories;
 
@@ -39,6 +40,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
 
     private readonly ParkingLotEntity _existParkingLot = ParkingLotEntity.CreateNewParkingLotEntity
+    (
+        "Test駐車場", "1234567", 
+        Prefecture.Tokyo, "東京都千代田区1-1-1",
+        "06-1234-1234", null, 20, 10, false ,true
+    );
+    private readonly ParkingLotEntity _notExistParkingLot = ParkingLotEntity.CreateNewParkingLotEntity
     (
         "Test駐車場", "1234567", 
         Prefecture.Tokyo, "東京都千代田区1-1-1",
@@ -142,15 +149,15 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
     [Fact]
     public async Task AddNewReservation_Test()
     {
-        using var conn = await CreateConnectionAsync();
+        using var session = await CreateConnectionAsync();
         IReservationRepository reservationRepository = new ReservationRepository(
-            conn
+            session
         );
         var expected = ArrangeReservations.First();
         
         var added = await reservationRepository.AddAsync(expected);
 
-        var inserted = await conn.QuerySingleOrDefaultAsync<ReservationTable>("""
+        var inserted = await session.Connection.QuerySingleOrDefaultAsync<ReservationTable>("""
             SELECT * FROM reservations
             WHERE id = @Id
         """, added);
@@ -186,7 +193,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
         var arrange = ArrangeReservations.First();
 
-        var table = await conn.QueryFirstAsync<ReservationTable>(
+        var table = await conn.Connection.QueryFirstAsync<ReservationTable>(
             """
             INSERT INTO reservations ( 
             id, reservation_number, account_id, parking_lot_id,
@@ -215,7 +222,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
         var updated = await reservationRepository.UpdateAsync(expect);
 
-        var inserted = await conn.QuerySingleOrDefaultAsync<ReservationTable>("""
+        var inserted = await conn.Connection.QuerySingleOrDefaultAsync<ReservationTable>("""
             SELECT * FROM reservations
             WHERE id = @Id
         """, updated);
@@ -226,10 +233,10 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
     [Fact]
     public async Task FindByReservationIdAsyncTest()
-    {        
-        using var conn = await CreateConnectionAsync();
+    {
+        using var dbSession = await CreateConnectionAsync();
         IReservationRepository reservationRepository = new ReservationRepository(
-            conn
+            dbSession
         );
 
         var inComing = DateTime.Now;
@@ -238,7 +245,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
 
         var arrange = ArrangeReservations.First();
 
-        var table = await conn.QueryFirstAsync<ReservationTable>(
+        var table = await dbSession.Connection.QueryFirstAsync<ReservationTable>(
             """
             INSERT INTO reservations ( 
             id, reservation_number, account_id, parking_lot_id,
@@ -265,16 +272,16 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
     [Fact]
     public async Task FindByAccountIdAsyncTest()
     {        
-        using var conn = await CreateConnectionAsync();
+        using var dbSession = await CreateConnectionAsync();
         IReservationRepository reservationRepository = new ReservationRepository(
-            conn
+            dbSession
         );
 
         var inComing = DateTime.Now;
         inComing = DateTime.UtcNow.AddTicks(-(inComing.Ticks % TimeSpan.TicksPerMinute));
         var OutGoing = inComing.AddHours(12);
 
-        var tables = await conn.ExecuteAsync(
+        var tables = await dbSession.Connection.ExecuteAsync(
             """
             INSERT INTO reservations ( 
             id, reservation_number, account_id, parking_lot_id,
@@ -286,7 +293,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) ;
             """
-        , ArrangeReservations);
+        , ArrangeReservations, dbSession.Transaction);
 
         var exists = await reservationRepository.FindByAccountIdAsync(_existAccount.Id);
         exists.ShouldNotBeNull();
@@ -300,12 +307,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
     [Fact]
     public async Task FindByParkingLotIdAsyncTest()
     {        
-        using var conn = await CreateConnectionAsync();
+        using var dbSession = await CreateConnectionAsync();
         IReservationRepository reservationRepository = new ReservationRepository(
-            conn
+            dbSession
         );
 
-        var tables = await conn.ExecuteAsync(
+        var tables = await dbSession.Connection.ExecuteAsync(
             """
             INSERT INTO reservations ( 
             id, reservation_number, account_id, parking_lot_id,
@@ -317,22 +324,22 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) ;
             """
-        , ArrangeReservations);
+        , ArrangeReservations, dbSession.Transaction);
 
         var exists = await reservationRepository.FindByParkingLotIdAsync(_existParkingLot.Id);
         exists.ShouldNotBeNull();
         exists.Length.ShouldBe(ArrangeReservations.Length);
 
         // 適当な存在しないIDを流す
-        var notExist = await reservationRepository.FindByParkingLotIdAsync(_notExistAccount.Id);
+        var notExist = await reservationRepository.FindByParkingLotIdAsync(_notExistParkingLot.Id);
         notExist.ShouldBeEmpty();
     }
 
     [Fact]
     public async Task FindOverlappingByParkingLotIdAsyncTest()
     {
-        using var conn = await CreateConnectionAsync();
-        IReservationRepository reservationRepository = new ReservationRepository(conn);
+        using var dbSession = await CreateConnectionAsync();
+        IReservationRepository reservationRepository = new ReservationRepository(dbSession);
 
         var otherParkingLot = ParkingLotEntity.CreateNewParkingLotEntity(
             "Other Test駐車場", "7654321",
@@ -340,7 +347,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             "06-4321-4321", null, 20, 10, false, true
         );
 
-        await conn.ExecuteAsync(
+        await dbSession.Connection.ExecuteAsync(
             """
             INSERT INTO parking_lots(
                 id, display_name, prefecture_id, zip_code, street_address, phone_number, fax_number,
@@ -352,7 +359,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             );
             """,
             otherParkingLot
-        );
+        , dbSession.Transaction);
 
         var from = new DateTime(2026, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var to = from.AddHours(1);
@@ -368,7 +375,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         };
         reservations[5].Cancel();
 
-        await conn.ExecuteAsync(
+        await dbSession.Connection.ExecuteAsync(
             """
             INSERT INTO reservations (
                 id, reservation_number, account_id, parking_lot_id, incoming_datetime, outgoing_datetime,
@@ -380,7 +387,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             );
             """,
             reservations
-        );
+        , dbSession.Transaction);
 
         var overlaps = await reservationRepository.FindOverlappingByParkingLotIdAsync(
             _existParkingLot.Id,
@@ -401,12 +408,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
     [Fact]
     public async Task DeleteReservation_Test()
     {       
-        using var conn = await CreateConnectionAsync();
+        using var dbSession = await CreateConnectionAsync();
         IReservationRepository reservationRepository = new ReservationRepository(
-            conn
+            dbSession
         );
         
-        var tables = await conn.ExecuteAsync(
+        var tables = await dbSession.Connection.ExecuteAsync(
             """
             INSERT INTO reservations ( 
             id, reservation_number, account_id, parking_lot_id,
@@ -418,7 +425,7 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             @ReservationStatus, @BusCampanyName, 
             @CanceledAt) ;
             """
-        , ArrangeReservations);
+        , ArrangeReservations, dbSession.Transaction);
 
         var target = ArrangeReservations.First();
 
@@ -430,10 +437,12 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
         
     }
 
-    public async Task<IDbConnection> CreateConnectionAsync(string[]? seedSqlPaths = null)
+    public async Task<DbSession> CreateConnectionAsync(string[]? seedSqlPaths = null)
     {
         var conn = dbService!.CreateConnection();
+        var dbSession = new DbSession(conn);
         dbService!.ConfigureMappings();
+        await dbSession.BeginAsync();
 
         if (seedSqlPaths is not null)
         {
@@ -441,11 +450,11 @@ public class ReservationRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncL
             {
                 var seedSqlPath = Path.GetFullPath(path);
                 var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-                await conn.ExecuteAsync(seedSql);            
+                await conn.ExecuteAsync(seedSql, transaction: dbSession.Transaction);
             }
         }
 
-        return conn;
+        return dbSession;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

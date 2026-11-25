@@ -3,20 +3,18 @@ using BusReservationService.Database.Interface;
 
 namespace BusReservationService.Infra.Database;
 
-public sealed class DbSession : IConnection, IUnitOfWork, IDisposable
+public sealed class DbSession : IDbContext, IUnitOfWork, IDisposable
 {
     private bool _disposed = false;
     public DbSession(IDbConnection connection)
     {
         Connection = connection;
+        Transaction = null;
     }
 
-    public IDbConnection Connection { get; }
-    public IDbTransaction? Transaction { get; private set; }
-
-    public async Task BeginAsync(IsolationLevel? isolationLevel)
+    public Task BeginAsync(IsolationLevel? isolationLevel = null)
     {
-        EnsureConnectionOpen(Connection);
+        EnsureConnectionOpen();
 
         if (Transaction is null)
         {
@@ -29,9 +27,11 @@ public sealed class DbSession : IConnection, IUnitOfWork, IDisposable
                 Transaction = Connection.BeginTransaction();
             }
         }
+
+        return Task.CompletedTask;
     }
 
-    public async Task RollbackAsync()
+    public Task RollbackAsync()
     {
         if (Transaction is not null)
         {
@@ -46,9 +46,11 @@ public sealed class DbSession : IConnection, IUnitOfWork, IDisposable
                 Connection.Close();
             }
         }
+
+        return Task.CompletedTask;
     }
 
-    public async Task CommitAsync()
+    public Task CommitAsync()
     {
         if (Transaction is null)
         {
@@ -64,6 +66,8 @@ public sealed class DbSession : IConnection, IUnitOfWork, IDisposable
             Transaction = null;
             Connection.Close();
         }
+
+        return Task.CompletedTask;
     }
 
     public void Dispose()

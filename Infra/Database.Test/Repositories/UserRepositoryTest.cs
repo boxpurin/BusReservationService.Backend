@@ -11,6 +11,7 @@ using Shouldly;
 using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
+using BusReservationService.Infra.Database;
 
 namespace BusReservationService.Database.Test.Repositories;
 
@@ -57,11 +58,10 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
         await _respawner.ResetAsync((System.Data.Common.DbConnection)conn);
     }
     
-
-    // IDbConnection を生成して返すファクトリメソッド
-    public async Task<IDbConnection> CreateConnectionAsync(string[]? seedSqlPaths = null)
+    public async Task<DbSession> CreateConnectionAsync(string[]? seedSqlPaths = null)
     {
         var conn = dbService!.CreateConnection();
+        DbSession dbSession = new DbSession(conn);
 
         if (seedSqlPaths is not null)
         {
@@ -69,11 +69,11 @@ public class UserRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLifetime
             {
                 var seedSqlPath = Path.GetFullPath(path);
                 var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-                await conn.ExecuteAsync(seedSql);            
+                await dbSession.Connection.ExecuteAsync(seedSql);
             }
         }
 
-        return conn;
+        return dbSession;
     }
 
     [Fact]

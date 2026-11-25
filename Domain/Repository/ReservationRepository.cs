@@ -26,6 +26,14 @@ public interface IReservationRepository
     Task<ReservationEntity?> FindByReservationIdAsync(Guid reservationId);
 
     /// <summary>
+    /// 予約IDから予約情報を取得する（更新用）
+    /// ロックを取得する場合に使用する
+    /// </summary>
+    /// <param name="reservationId">予約ID</param>
+    /// <returns>対象の予約のエンティティ   </returns>
+    Task<ReservationEntity?> FindByReservationIdForUpdateAsync(Guid reservationId);
+
+    /// <summary>
     /// 予約者のアカウントIDから予約情報一覧を取得する
     /// </summary>
     /// <param name="accountId">予約者のアカウントID</param>

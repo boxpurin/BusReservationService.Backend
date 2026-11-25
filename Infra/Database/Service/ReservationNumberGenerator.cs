@@ -1,3 +1,4 @@
+using BusReservationService.Database.Interface;
 using BusReservationService.Domain.Service;
 using BusReservationService.Domain.ValueObject.Unit;
 using BusReservationService.Infra.Database;
@@ -6,7 +7,7 @@ using BusReservationService.Share.Utils.Error;
 using Dapper;
 
 
-public class ReservationNumberGenerator(DbSession session) : IReservationNumberGenerator
+public class ReservationNumberGenerator(IDbContext session) : IReservationNumberGenerator
 {
     public async Task<ReservationNumberUnit>
     GenerateAsync(Guid parkingLotId, DateOnly date)

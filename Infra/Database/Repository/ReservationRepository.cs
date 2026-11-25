@@ -8,11 +8,11 @@ using System.Data;
 
 namespace BusReservationService.Database.Repository;
 
-public class ReservationRepository(IDbConnection connection) : IConnection, IReservationRepository
+public class ReservationRepository(IDbContext context) : IDbContext, IReservationRepository
 {
     public async Task<ReservationEntity> AddAsync(ReservationEntity reservation)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
             INSERT INTO reservations ( 
@@ -27,7 +27,7 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
             RETURNING * ;
         """;
 
-        var table = await connection.QuerySingleAsync<ReservationTable>(
+        var table = await context.Connection.QuerySingleAsync<ReservationTable>(
             sql, reservation
         );
 
@@ -35,7 +35,7 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
     }
     public async Task<ReservationEntity> UpdateAsync(ReservationEntity reservation)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
             UPDATE reservations 
@@ -52,7 +52,7 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
             RETURNING * ;
         """;
 
-        var table = await connection.QuerySingleAsync<ReservationTable>(
+        var table = await context.Connection.QuerySingleAsync<ReservationTable>(
             sql, reservation
         );
 
@@ -61,13 +61,13 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<ReservationEntity[]> FindByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
         SELECT * FROM reservations WHERE account_id = @AccountId
         """;
 
-        var rows = await connection.QueryAsync<ReservationTable>(
+        var rows = await context.Connection.QueryAsync<ReservationTable>(
             sql, new { AccountId = accountId }
         );
 
@@ -76,13 +76,13 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<ReservationEntity[]> FindByParkingLotIdAsync(Guid parkingLotId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
         SELECT * FROM reservations WHERE parking_lot_id = @ParkingLotId
         """;
 
-        var rows = await connection.QueryAsync<ReservationTable>(
+        var rows = await context.Connection.QueryAsync<ReservationTable>(
             sql, new { ParkingLotId = parkingLotId }
         );
 
@@ -91,13 +91,29 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<ReservationEntity?> FindByReservationIdAsync(Guid reservationId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
         SELECT * FROM reservations WHERE id = @ReservationId
         """;
 
-        var row = await connection.QuerySingleOrDefaultAsync<ReservationTable>(
+        var row = await context.Connection.QuerySingleOrDefaultAsync<ReservationTable>(
+            sql, new { ReservationId = reservationId }
+        );
+
+        return row?.ToDomain();
+    }
+
+    
+    public async Task<ReservationEntity?> FindByReservationIdForUpdateAsync(Guid reservationId)
+    {
+        context.EnsureConnectionOpen();
+
+        var sql = """
+        SELECT * FROM reservations WHERE id = @ReservationId FOR UPDATE;
+        """;
+
+        var row = await context.Connection.QuerySingleOrDefaultAsync<ReservationTable>(
             sql, new { ReservationId = reservationId }
         );
 
@@ -106,7 +122,7 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<ReservationEntity[]> FindOverlappingByParkingLotIdAsync(Guid parkingLotId, DateTime from, DateTime to)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
         SELECT * FROM reservations WHERE parking_lot_id = @ParkingLotId
@@ -115,7 +131,7 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
         AND outgoing_datetime > @From;
         """;
 
-        var rows = await connection.QueryAsync<ReservationTable>(
+        var rows = await context.Connection.QueryAsync<ReservationTable>(
             sql, new { ParkingLotId = parkingLotId, From = from, To = to }
         );
 
@@ -124,13 +140,13 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<bool> ExistByReservationIdAsync(Guid reservationId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
         SELECT * FROM reservations WHERE id = @ReservationId
         """;
 
-        var row = await connection.QuerySingleOrDefaultAsync<ReservationTable>(
+        var row = await context.Connection.QuerySingleOrDefaultAsync<ReservationTable>(
             sql, new { ReservationId = reservationId }
         );
 
@@ -138,13 +154,13 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
     }
     public async Task<int> DeleteByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
-        DELETE FROM reservations WHERE account_id = @Id
+        DELETE FROM reservations WHERE account_id = @id
         """;
 
-        var ret = await connection.ExecuteAsync(sql, new { id = accountId });
+        var ret = await context.Connection.ExecuteAsync(sql, new { id = accountId });
 
         
         return ret;
@@ -152,15 +168,15 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<int> DeleteByParkingLotIdAsync(Guid parkingLotId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
-        DELETE FROM reservations WHERE parking_lot_id = @Id
+        DELETE FROM reservations WHERE parking_lot_id = @id
         """;
 
-        var tx = connection.BeginTransaction();
+        var tx = context.Connection.BeginTransaction();
 
-        var ret = await connection.ExecuteAsync(sql, new { id = parkingLotId }, tx);
+        var ret = await context.Connection.ExecuteAsync(sql, new { id = parkingLotId }, tx);
 
         tx.Commit();
 
@@ -169,13 +185,13 @@ public class ReservationRepository(IDbConnection connection) : IConnection, IRes
 
     public async Task<bool> DeleteByReservationIdAsync(Guid reservationId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
-        DELETE FROM reservations WHERE id = @Id
+        DELETE FROM reservations WHERE id = @id
         """;
 
-        var ret = await connection.ExecuteAsync(sql, new { id = reservationId });
+        var ret = await context.Connection.ExecuteAsync(sql, new { id = reservationId });
 
         return ret == 1;
     }

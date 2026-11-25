@@ -9,11 +9,11 @@ using System.Data;
 
 namespace BusReservationService.Database.Repository;
 
-public class ParkingLotRepository(IDbConnection connection) : IConnection, IParkingLotRepository
+public class ParkingLotRepository(IDbContext context) : IParkingLotRepository
 {
     public async Task<ParkingLotEntity> AddAsync(AddParkingLotDto dto)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
             INSERT INTO parking_lots(
                 display_name, prefecture_id, zip_code, street_address, phone_number, fax_number,
@@ -39,19 +39,16 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
             dto.IsActive
         );
 
-        var tx = connection.BeginTransaction();
-        var table = await connection.QueryFirstAsync<ParkingLotTable>(
-            sql, entity, tx
+        var table = await context.Connection.QueryFirstAsync<ParkingLotTable>(
+            sql, entity, context.Transaction
         );
-
-        tx.Commit();
 
         return table.ToDomain();
     }
     
     public async Task<ParkingLotEntity> UpdateAsync(ParkingLotEntity entity)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
         UPDATE parking_lots 
@@ -70,24 +67,21 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
         RETURNING * ; 
         """;
 
-        var tx = connection.BeginTransaction();
-        var table = await connection.QueryFirstAsync<ParkingLotTable>(
-            sql, entity, tx
+        var table = await context.Connection.QueryFirstAsync<ParkingLotTable>(
+            sql, entity, context.Transaction
         );
-
-        tx.Commit();
 
         return table.ToDomain();
     }
     public async Task<ParkingLotEntity[]> GetAllAsync()
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
             SELECT * FROM parking_lots; 
         """;
 
-        var tables = await connection.QueryAsync<ParkingLotTable>(sql);
+        var tables = await context.Connection.QueryAsync<ParkingLotTable>(sql);
 
         if(tables.FirstOrDefault() is null)
         {
@@ -99,15 +93,32 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
 
 
     public async Task<ParkingLotEntity?> FindByParkingLotIdAsync(Guid parkingLotId)
-    {        
-        EnsureConnectionOpen(connection);
+    {
+        context.EnsureConnectionOpen();
 
         var sql = """
             SELECT * FROM parking_lots
             WHERE id = @Id; 
         """;
 
-        var table = await connection.QueryFirstOrDefaultAsync<ParkingLotTable>(
+        var table = await context.Connection.QueryFirstOrDefaultAsync<ParkingLotTable>(
+            sql, new { Id = parkingLotId }
+        );
+
+        return table?.ToDomain();
+    }
+
+    public async Task<ParkingLotEntity?> FindByParkingLotIdForUpdateAsync(Guid parkingLotId)
+    {
+        context.EnsureConnectionOpen();
+
+        var sql = """
+            SELECT * FROM parking_lots
+            WHERE id = @Id
+            FOR UPDATE;
+        """;
+
+        var table = await context.Connection.QueryFirstOrDefaultAsync<ParkingLotTable>(
             sql, new { Id = parkingLotId }
         );
 
@@ -116,14 +127,14 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
 
     public async Task<ParkingLotEntity[]> FindByPrefactureIdAsync(Prefecture prefecture)
     {        
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
             SELECT * FROM parking_lots 
             WHERE prefecture_id = @Id;
         """;
 
-        var tables = await connection.QueryAsync<ParkingLotTable>(sql, new { Id = prefecture });
+        var tables = await context.Connection.QueryAsync<ParkingLotTable>(sql, new { Id = prefecture });
 
         if(tables.FirstOrDefault() is null)
         {
@@ -135,14 +146,14 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
 
     public async Task<bool> ExistByParkingLotIdAsync(Guid parkingLotId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
             SELECT COUNT(*) FROM parking_lots
             WHERE id = @Id; 
         """;
 
-        var row = await connection.ExecuteScalarAsync<int>(
+        var row = await context.Connection.ExecuteScalarAsync<int>(
             sql, new { Id = parkingLotId }
         );
 
@@ -150,14 +161,14 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
     }
     public async Task<bool> ExistByPrefectureAsync(Prefecture prefecture)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         var sql = """
             SELECT COUNT(*) FROM parking_lots
             WHERE prefecture_id = @Id; 
         """;
 
-        var row = await connection.ExecuteScalarAsync<int>(
+        var row = await context.Connection.ExecuteScalarAsync<int>(
             sql, new { Id = prefecture }
         );
 
@@ -166,17 +177,14 @@ public class ParkingLotRepository(IDbConnection connection) : IConnection, IPark
 
     public async Task<bool> DeleteAsync(Guid parkingLotId)
     {
-        EnsureConnectionOpen(connection);
+
+        context.EnsureConnectionOpen();
 
         var sql = """
         DELETE FROM parking_lots WHERE id = @Id
         """;
 
-        var tx = connection.BeginTransaction();
-
-        var ret = await connection.ExecuteAsync(sql, new { id = parkingLotId }, tx);
-    
-        tx.Commit();
+        var ret = await context.Connection.ExecuteAsync(sql, new { Id = parkingLotId }, context.Transaction);
 
         return ret == 1;
     }

@@ -10,11 +10,11 @@ using System.Data;
 
 namespace BusReservationService.Database.Repository;
 
-public class UserRepository(IDbConnection connection) : IConnection, IUserRepository
+public class UserRepository(IDbContext context) : IUserRepository
 {
     public async Task<UserEntity> AddAsync(AddAsyncDto dto)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         const string sql = """
                 INSERT INTO users 
@@ -23,7 +23,11 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
                 RETURNING *;
             """;
 
-        var userTable = await connection.QueryFirstAsync<UserTable>(sql, dto);
+        var userTable = await context.Connection.QueryFirstAsync<UserTable>(
+            sql,
+            dto,
+            context.Transaction
+        );
 
         return UserEntity.
             CreateUserEntity(
@@ -39,7 +43,7 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 
     public async Task<UserEntity> UpdateAsync(UserEntity entity)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         const string sql = """
                 UPDATE users
@@ -56,17 +60,25 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
                 RETURNING * ;
             """;
 
-        var userTable = await connection.QueryFirstAsync<UserTable>(sql, entity);
+        var userTable = await context.Connection.QueryFirstAsync<UserTable>(
+            sql,
+            entity,
+            context.Transaction
+        );
 
         return userTable.ToDomain();
     }
 
     public async Task<UserEntity?> FindByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
-        var userTable = await connection.QueryFirstOrDefaultAsync<UserTable>(sql, new { AccountId = accountId });
+        var userTable = await context.Connection.QueryFirstOrDefaultAsync<UserTable>(
+            sql,
+            new { AccountId = accountId },
+            context.Transaction 
+        );
 
         if ( userTable is null )
         {
@@ -86,11 +98,15 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
     }
     public async Task<bool> ExistByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         string sql = "SELECT * FROM users WHERE account_id = @AccountId";
 
-        var ret = await connection.QueryFirstOrDefaultAsync<UserTable>(sql, new { AccountId = accountId });
+        var ret = await context.Connection.QueryFirstOrDefaultAsync<UserTable>(
+            sql,
+            new { AccountId = accountId },
+            context.Transaction
+        );
 
         return ret is not null;
     }
@@ -98,9 +114,13 @@ public class UserRepository(IDbConnection connection) : IConnection, IUserReposi
 
     public async Task<bool> DeleteByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         
-        var ret = await connection.ExecuteAsync("DELETE FROM users WHERE account_id = @AccountId", new { AccountId = accountId });
+        var ret = await context.Connection.ExecuteAsync(
+            "DELETE FROM users WHERE account_id = @AccountId",
+            new { AccountId = accountId },
+            context.Transaction
+        );
 
         return ret == 1;
     }

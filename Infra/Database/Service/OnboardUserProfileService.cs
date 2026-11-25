@@ -13,22 +13,22 @@ using BusReservationService.Database.Table;
 
 namespace BusReservationService.Infra.Database.Service;
 
-public class OnboardUserProfileService(IDbConnection conn, IAccountRepository accountRepository, IUserRepository userRepository) 
-: IConnection, IOnboardUserProfileService
+public class OnboardUserProfileService(
+    DbSession session,
+    IAccountRepository accountRepository,
+    IUserRepository userRepository)
+: IOnboardUserProfileService
 {
     public async Task<ApplicationResult<AccountModel, Error>> OnboardUserProfile(Guid accountId, string firstName, string lastName, string zipCode, string streetAddress, string phoneNumber, string? faxNumber, UserType userType)
     {
-        EnsureConnectionOpen(conn);
-
-        using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
-
+        await session.BeginAsync(IsolationLevel.ReadCommitted);
         try
         {
             // アカウント情報を習得
             var account = await LockAccountAsync(accountId);
             if (account is null)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<AccountModel, Error>(new Error{
                     Message = "The account was not found.",
                     ErrorCode = "AccountNotFound",
@@ -39,7 +39,7 @@ public class OnboardUserProfileService(IDbConnection conn, IAccountRepository ac
             // すでにユーザー情報が追加されているアカウントIDなのかを確認する
             if (await userRepository.ExistByAccountIdAsync(account.Id))
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<AccountModel, Error>(new Error{
                     Message = "The user profile already exists for this account.",
                     ErrorCode = "UserAlreadyExists",
@@ -61,7 +61,7 @@ public class OnboardUserProfileService(IDbConnection conn, IAccountRepository ac
 
             if (user is null)
             {
-                tx.Rollback();
+                await session.RollbackAsync();
                 return new Err<AccountModel, Error>(new Error{
                     Message = "Failed to create the user profile.",
                     ErrorCode = "UserCreationFailed",
@@ -75,13 +75,13 @@ public class OnboardUserProfileService(IDbConnection conn, IAccountRepository ac
 
             await accountRepository.UpdateAsync(updatedAccount);
 
-            tx.Commit();
+            await session.CommitAsync();
 
             return new Ok<AccountModel, Error>(new AccountModel(updatedAccount));
         }
         catch
         {
-            tx.Rollback();
+            await session.RollbackAsync();
             throw;
         }
     }
@@ -89,9 +89,10 @@ public class OnboardUserProfileService(IDbConnection conn, IAccountRepository ac
 
     private async Task<AccountTable?> LockAccountAsync(Guid accountId)
     {
-        return await conn.QueryFirstOrDefaultAsync<AccountTable>(
+        return await session.Connection.QueryFirstOrDefaultAsync<AccountTable>(
             "SELECT * FROM accounts WHERE id = @accountId FOR UPDATE",
-            new { accountId }
+            new { accountId },
+            session.Transaction
         );
     }
 }

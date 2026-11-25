@@ -12,6 +12,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using Respawn;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
+using BusReservationService.Infra.Database;
 
 namespace BusReservationService.Database.Test.Repositories;
 
@@ -58,9 +59,10 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         await _respawner.ResetAsync((System.Data.Common.DbConnection)conn);
     }
     
-    public async Task<IDbConnection> CreateConnectionAsync(string[]? seedSqlPaths = null)
+    public async Task<DbSession> CreateConnectionAsync(string[]? seedSqlPaths = null)
     {
         var conn = dbService!.CreateConnection();
+        DbSession dbSession = new DbSession(conn);
 
         if (seedSqlPaths is not null)
         {
@@ -68,11 +70,11 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
             {
                 var seedSqlPath = Path.GetFullPath(path);
                 var seedSql = await File.ReadAllTextAsync(seedSqlPath);
-                await conn.ExecuteAsync(seedSql);
+                await dbSession.Connection.ExecuteAsync(seedSql);
             }
         }
 
-        return conn;
+        return dbSession;
     }
 
     [Fact]
@@ -97,9 +99,9 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
     [Fact]
     public async Task UpdateParkingLot_Test()
     {
-        using var conn = await CreateConnectionAsync();
-        conn.Open();
-
+        using var dbSession = await CreateConnectionAsync();
+        await dbSession.BeginAsync();
+    
         var seed = ParkingLotEntity.CreateNewParkingLotEntity(
             "TestInit駐車場", "1234567", Prefecture.Hokkaido,  "東京都千代田区1-1-1",
             "090-0000-0000", "06-0000-0000", 20, 10, true, true
@@ -123,15 +125,20 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
         );
 
         IParkingLotRepository repository = new ParkingLotRepository(
-            conn
+            dbSession
         );
 
         var updatedEntity = await repository.UpdateAsync(expect);
-
         updatedEntity.ShouldNotBeNull();
         updatedEntity.ShouldBeEquivalentTo(expect);
 
         var updatedTable = await SelectParkingLotTableAsync(expect);
+        updatedTable.Id.ShouldBe(updatedEntity.Id);
+        updatedTable.DisplayName.ShouldNotBe(updatedEntity.ParkingLotName);
+
+        await dbSession.CommitAsync();
+        
+        updatedTable = await SelectParkingLotTableAsync(expect);
 
         updatedTable.Id.ShouldBe(updatedEntity.Id);
         updatedTable.DisplayName.ShouldBe(updatedEntity.ParkingLotName);
@@ -153,10 +160,9 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
     
     private async Task<ParkingLotTable[]> InsertParkingLotAsync(object? param = null)
     {
-        using var conn = dbService!.CreateConnection();
-        conn.Open();
-        var tx = conn.BeginTransaction();
-        var tables = await conn.QueryAsync<ParkingLotTable>("""
+        using var dbSession = await CreateConnectionAsync();
+        await dbSession.BeginAsync();
+        var tables = await dbSession.Connection.QueryAsync<ParkingLotTable>("""
             INSERT INTO parking_lots(
                 display_name, prefecture_id, zip_code, street_address, phone_number, fax_number,
                 max_capacity, reservation_capacity, is_allows_boarding_alighting, is_active
@@ -166,24 +172,23 @@ public class ParkingLotRepositoryTest : IClassFixture<DatabaseFixture>, IAsyncLi
                 @MaxCapacity, @ReservationCapacity, @IsAllowsBoardingAlighting, @IsActive
             )
             RETURNING * ;
-        """, param, tx);
+        """, param, dbSession.Transaction);
 
-        tx.Commit();
+        await dbSession.CommitAsync();
 
         return tables.ToArray();
     }
 
     private async Task<ParkingLotTable> SelectParkingLotTableAsync(ParkingLotEntity expect)
     {
-        using var conn = dbService!.CreateConnection();
-        conn.Open();
-        var tx = conn.BeginTransaction();
+        using var dbSession = await CreateConnectionAsync();
+        await dbSession.BeginAsync();
 
         string sql = """
             SELECT * FROM parking_lots WHERE id = @Id;
         """;
-        var table = await conn.QueryFirstAsync<ParkingLotTable>(sql, expect, tx);
-        tx.Commit();
+        var table = await dbSession.Connection.QueryFirstAsync<ParkingLotTable>(sql, expect, dbSession.Transaction);
+        await dbSession.CommitAsync();
 
         return table;
     }

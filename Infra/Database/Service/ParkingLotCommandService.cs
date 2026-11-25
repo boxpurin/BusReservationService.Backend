@@ -5,16 +5,18 @@ using BusReservationService.Database.Table;
 using BusReservationService.Domain.Repository;
 using BusReservationService.Share;
 using BusReservationService.Share.Utils.Error;
+using BusReservationService.Infra.Database;
+using BusReservationService;
 
 public class ParkingLotCommandService(
-    IDbConnection conn,
+    IUnitOfWork session,
     IParkingLotRepository parkingLotRepository,
     IReservationRepository reservationRepository)
-    : IConnection, IParkingLotCommandService
+    : IParkingLotCommandService
 {
     public async Task<ApplicationResult<int, Error>> CountAvailableReservationSpace(Guid parkingLotId, DateTime datetime)
         {
-            EnsureConnectionOpen(conn);
+            await session.BeginAsync(IsolationLevel.ReadCommitted);
 
             try
             {
@@ -39,10 +41,12 @@ public class ParkingLotCommandService(
                     return p.IncomingDateTime <= datetime && datetime < p.OutgoingDateTime ;
                 });
 
+                await session.CommitAsync();
                 return new Ok<int, Error>(available);
             }
             catch
             {
+                await session.RollbackAsync();
                 throw;
             }
         }
