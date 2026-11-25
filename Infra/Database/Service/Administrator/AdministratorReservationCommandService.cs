@@ -20,28 +20,28 @@ public class AdministratorReservationCommandService(
     {
 
         await unit.BeginAsync();
-        var adminAccount = await accountRoleRepository.FindByAccountIdAsync(adminAccountId);
-
-        if (adminAccount is null)
-        {
-            return new Err<int, Error>(new Error{
-                Message = "Unauthorized",
-                ErrorCode = "UNAUTHORIZED_ACCOUNT",
-                StatusCode = 401 }
-            );
-        }
-
-        if (adminAccount.AccountRole != AccountRole.Admin)
-        {
-            return new Err<int, Error>(new Error{
-                Message = "Forbidden",
-                ErrorCode = "FORBIDDEN",
-                StatusCode = 403 }
-            );
-        }
 
         try
         {
+            var adminAccount = await accountRoleRepository.FindByAccountIdAsync(adminAccountId);
+
+            if (adminAccount is null)
+            {
+                return new Err<int, Error>(new Error{
+                    Message = "Unauthorized",
+                    ErrorCode = "UNAUTHORIZED_ACCOUNT",
+                    StatusCode = 401 }
+                );
+            }
+
+            if (adminAccount.AccountRole != AccountRole.Admin)
+            {
+                return new Err<int, Error>(new Error{
+                    Message = "Forbidden",
+                    ErrorCode = "FORBIDDEN",
+                    StatusCode = 403 }
+                );
+            }
             var lockedReservation = await reservationRepository.FindByReservationIdForUpdateAsync(reservationId);
 
             if (lockedReservation is null)
