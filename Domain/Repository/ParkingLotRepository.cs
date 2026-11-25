@@ -10,6 +10,7 @@ public interface IParkingLotRepository
     Task<ParkingLotEntity> AddAsync(AddParkingLotDto dto);
     Task<ParkingLotEntity> UpdateAsync(ParkingLotEntity entity);
     Task<ParkingLotEntity[]> GetAllAsync();
+    Task<ParkingLotEntity?> FindByParkingLotIdForUpdateAsync(Guid parkingLotId);
     Task<ParkingLotEntity?> FindByParkingLotIdAsync(Guid parkingLotId);
     Task<ParkingLotEntity[]> FindByPrefactureIdAsync(Prefecture prefactureId);
     Task<bool> ExistByParkingLotIdAsync(Guid parkingLotId);
