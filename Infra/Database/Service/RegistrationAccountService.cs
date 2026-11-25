@@ -12,14 +12,17 @@ using BusReservationService.Database.Interface;
 
 namespace BusReservationService.Infra.Database.Service;
 
-public class RegistrationAccountService(IDbConnection conn, IAccountRepository accountRepository) : IConnection, IRegistrationAccountService
+public class RegistrationAccountService(
+    DbSession session,
+    IAccountRepository accountRepository) : IRegistrationAccountService
 {
     public async Task<ApplicationResult<AccountModel, Error>> RegistrationAccountAsync(string email, string password)
     {
-        EnsureConnectionOpen(conn);
-
+        await session.BeginAsync(IsolationLevel.ReadCommitted);
+        
         if(await accountRepository.IsExistByEmailAsync(email))
         {
+            await session.RollbackAsync();
             return new Err<AccountModel, Error>(
                 new Error {
                     Message = "The email is already registered.",
@@ -34,18 +37,16 @@ public class RegistrationAccountService(IDbConnection conn, IAccountRepository a
         
         newAccount.WaitForOnboard();
         
-        using var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted);
-        
         try
         {
             var createdAccount = await accountRepository.AddAsync(newAccount);
-            tx.Commit();
+            await session.CommitAsync();
 
             return new Ok<AccountModel, Error>(new AccountModel(createdAccount));
         }
         catch
         {
-            tx.Rollback();
+            await session.RollbackAsync();
             throw;
         }
     }

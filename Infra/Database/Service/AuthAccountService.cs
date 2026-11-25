@@ -9,11 +9,14 @@ using System.Net;
 
 namespace BusReservationService.Infra.Database.Service;
 
-public class AuthUserAccountService(IAccountUserQueryService accountUserQueryService) : IConnection, IAuthAccountService
+public class AuthUserAccountService(
+    DbSession session,
+    IAccountUserQueryService accountUserQueryService) : IAuthAccountService
 {
 
     public async Task<ApplicationResult<AccountUserModel, Error>> SignInAccountAsync(string email, string password)
     {
+        await session.BeginAsync();
         var accountUser = await accountUserQueryService.GetModelByEmailAsync(email);
         if (accountUser is null)
         {
