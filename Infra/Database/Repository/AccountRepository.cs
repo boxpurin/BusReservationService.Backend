@@ -2,17 +2,18 @@
 using BusReservationService.Database.Table;
 using BusReservationService.Domain.Entity;
 using BusReservationService.Domain.Repository;
+using BusReservationService.Infra.Database;
 using BusReservationService.Share;
 using Dapper;
 using System.Data;
 
 namespace BusReservationService.Database.Repository;
 
-public class AccountRepository(IDbConnection connection) : IConnection, IAccountRepository
+public class AccountRepository(IDbContext context) : IAccountRepository
 {
     public async Task<AccountEntity> AddAsync(AccountEntity account)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         const string sql = """
                 INSERT INTO public.accounts (id, email, password_hash, password_salt, account_status, account_role)
@@ -20,7 +21,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 RETURNING *;
             """;
 
-        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account);
+        var ret = await context.Connection.QueryFirstAsync<AccountTable>(sql, account, context.Transaction);
 
         return ret.ToDomain();
     }
@@ -28,7 +29,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
     public async Task<AccountEntity> UpdateAsync(AccountEntity account)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
 
         const string sql = """
                 UPDATE public.accounts
@@ -42,7 +43,7 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
                 RETURNING *;
             """;
 
-        var ret = await connection.QueryFirstAsync<AccountTable>(sql, account);
+        var ret = await context.Connection.QueryFirstAsync<AccountTable>(sql, account, context.Transaction);
 
         return ret.ToDomain();
     }
@@ -50,47 +51,47 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
     public async Task<AccountEntity[]> GetAllAsync()
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
             SELECT * from public.accounts;
             """;
 
-        var ret = await connection.QueryAsync<AccountTable>(sql);
+        var ret = await context.Connection.QueryAsync<AccountTable>(sql, context.Transaction);
 
         return ret.Select(t => t.ToDomain()).ToArray();
     }
 
     public async Task<AccountEntity?> FindByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
             SELECT * from public.accounts WHERE id = @Id;
             """;
 
-        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Id = accountId});
+        var ret = await context.Connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Id = accountId}, context.Transaction);
 
         return ret?.ToDomain();
     }
     public async Task<AccountEntity?> FindByEmailAsync(string email)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
             SELECT * from public.accounts WHERE email = @Email;
             """;
 
-        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Email = email });
+        var ret = await context.Connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Email = email }, context.Transaction);
 
         return ret?.ToDomain();
     }
 
     public async Task<bool> IsExistByAccountIdAsync(Guid accountId)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
             SELECT * from public.accounts WHERE id = @Id;
             """;
 
-        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Id = accountId });
+        var ret = await context.Connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Id = accountId }, context.Transaction);
 
         return ret is not null;
 
@@ -98,24 +99,24 @@ public class AccountRepository(IDbConnection connection) : IConnection, IAccount
 
     public async Task<bool> IsExistByEmailAsync(string email)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
             SELECT * from public.accounts WHERE email = @Email;
             """;
 
-        var ret = await connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Email = email });
+        var ret = await context.Connection.QueryFirstOrDefaultAsync<AccountTable>(sql, new { Email = email }, context.Transaction);
 
         return ret is not null;
     }
     
     public async Task<bool> DeleteAsync(AccountEntity account)
     {
-        EnsureConnectionOpen(connection);
+        context.EnsureConnectionOpen();
         var sql = """
-            DELETE FROM accounts WHERE Id = @Id;
+            DELETE FROM accounts WHERE id = @Id;
             """;
-
-        var ret = await connection.ExecuteAsync(sql, account);
+            
+        var ret = await context.Connection.ExecuteAsync(sql, account, context.Transaction);
 
         return ret == 1;
     }
