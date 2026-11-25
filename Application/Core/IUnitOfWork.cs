@@ -6,7 +6,7 @@ public interface IUnitOfWork
     /// Begins a new unit of work transaction.
     /// </summary>
     /// <returns></returns>
-    Task BeginAsync(IsolationLevel? isolationLevel);
+    Task BeginAsync(IsolationLevel? isolationLevel = null);
     /// <summary>
     /// Rolls back the current unit of work transaction.
     /// </summary>
