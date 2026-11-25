@@ -14,7 +14,7 @@ using BusReservationService.Database.Table;
 namespace BusReservationService.Infra.Database.Service;
 
 public class OnboardUserProfileService(
-    DbSession session,
+    IUnitOfWork session,
     IAccountRepository accountRepository,
     IUserRepository userRepository)
 : IOnboardUserProfileService
@@ -25,7 +25,7 @@ public class OnboardUserProfileService(
         try
         {
             // アカウント情報を習得
-            var account = await LockAccountAsync(accountId);
+            var account = await accountRepository.FindByAccountIdAsync(accountId);
             if (account is null)
             {
                 await session.RollbackAsync();
@@ -70,7 +70,7 @@ public class OnboardUserProfileService(
             }
 
             // アカウントの有効化
-            var updatedAccount = account.ToDomain();
+            var updatedAccount = account;
             updatedAccount.Activate();
 
             await accountRepository.UpdateAsync(updatedAccount);
@@ -84,15 +84,5 @@ public class OnboardUserProfileService(
             await session.RollbackAsync();
             throw;
         }
-    }
-
-
-    private async Task<AccountTable?> LockAccountAsync(Guid accountId)
-    {
-        return await session.Connection.QueryFirstOrDefaultAsync<AccountTable>(
-            "SELECT * FROM accounts WHERE id = @accountId FOR UPDATE",
-            new { accountId },
-            session.Transaction
-        );
     }
 }

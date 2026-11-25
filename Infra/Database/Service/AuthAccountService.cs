@@ -10,7 +10,7 @@ using System.Net;
 namespace BusReservationService.Infra.Database.Service;
 
 public class AuthUserAccountService(
-    DbSession session,
+    IUnitOfWork session,
     IAccountUserQueryService accountUserQueryService) : IAuthAccountService
 {
 
