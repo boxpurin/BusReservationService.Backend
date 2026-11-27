@@ -12,7 +12,7 @@ internal class GetAvailabilityList(IParkingLotAvailabilityListService parkingLot
     public override void Configure()
     {
         Get("/parking-lots/{ParkingLotId}/availability");
-        AllowAnonymous();
+        Claims("AccountId");
     }
 
     public override async Task HandleAsync(GetAvailabilityListRequest req, CancellationToken ct)
