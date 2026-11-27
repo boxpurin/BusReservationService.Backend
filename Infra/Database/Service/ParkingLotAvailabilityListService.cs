@@ -34,8 +34,8 @@ public class ParkingLotAvailabilityListService(
                 SlotIntervalMinutes = options.SlotInterval
             };
 
-            var from_dt = date.ToDateTime(TimeOnly.MinValue);
-            var to_dt = date.ToDateTime(TimeOnly.MaxValue);
+            var from_dt = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var to_dt = date.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
 
             var overlappingReservations = await reservationRepository.FindOverlappingByParkingLotIdAsync(
                 parkingLotId,
