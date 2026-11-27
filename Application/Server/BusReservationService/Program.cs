@@ -15,6 +15,7 @@ using Application.Core.Services.Interface.Administrator;
 using BusReservationService;
 using BusReservationService.Domain.Service;
 using BusReservationService.Database.Interface;
+using BusReservationService.Application.Core.Services.Interface;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +50,7 @@ builder.Services.AddScoped<IReservationNumberGenerator, ReservationNumberGenerat
 builder.Services.AddScoped<IOnboardUserProfileService, OnboardUserProfileService>();
 builder.Services.AddScoped<IRegistrationAccountService, RegistrationAccountService>();
 builder.Services.AddScoped<IAuthAccountService, AuthUserAccountService>();
+builder.Services.AddScoped<IParkingLotAvailabilityListService, ParkingLotAvailabilityListService>();
 
 // Application Query Service
 builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
