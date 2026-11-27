@@ -57,6 +57,8 @@ builder.Services.AddScoped<IAccountUserQueryService, AccountUserQueryService>();
 
 // Reservation Command Service
 builder.Services.AddScoped<IReservationCommandService, ReservationCommandService>();
+ParkingLotAvailabilityOptions parkingLotAvailabilityOptions = new ParkingLotAvailabilityOptions();
+builder.Services.AddSingleton(parkingLotAvailabilityOptions);
 builder.Services.AddScoped<IParkingLotCommandService, ParkingLotCommandService>();
 
 // Administrator Reservation Command Service
