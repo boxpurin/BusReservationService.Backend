@@ -98,7 +98,7 @@ internal class DataBaseTestUserRepository(IDbContext context)
             SELECT * FROM users;
         """;
 
-        var tables = await context.Connection.QueryAsync<UserTable>(sql, context.Transaction);
+        var tables = await context.Connection.QueryAsync<UserTable>(sql, transaction: context.Transaction);
 
         if(tables.FirstOrDefault() is null)
         {

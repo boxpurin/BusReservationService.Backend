@@ -70,7 +70,7 @@ internal class DataBaseTestReservationRepository(IDbContext context)
             SELECT * FROM reservations;
         """;
 
-        var tables = await context.Connection.QueryAsync<ReservationTable>(sql, context.Transaction);
+        var tables = await context.Connection.QueryAsync<ReservationTable>(sql, transaction: context.Transaction);
 
         if(tables.FirstOrDefault() is null)
         {

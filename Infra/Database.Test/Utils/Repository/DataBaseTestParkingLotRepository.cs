@@ -96,7 +96,7 @@ internal class DataBaseTestParkingLotRepository(IDbContext context)
             SELECT * FROM parking_lots; 
         """;
 
-        var tables = await context.Connection.QueryAsync<ParkingLotTable>(sql, context.Transaction);
+        var tables = await context.Connection.QueryAsync<ParkingLotTable>(sql, transaction: context.Transaction);
 
         if(tables.FirstOrDefault() is null)
         {

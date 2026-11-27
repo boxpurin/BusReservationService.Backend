@@ -60,7 +60,7 @@ internal class DataBaseTestAccountRepository(IDbContext context)
             SELECT * from public.accounts;
             """;
 
-        var ret = await context.Connection.QueryAsync<AccountTable>(sql, context.Transaction);
+        var ret = await context.Connection.QueryAsync<AccountTable>(sql, transaction: context.Transaction);
 
         return ret.Select(t => t.ToDomain()).ToArray();
     }
